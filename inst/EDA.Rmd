@@ -1,0 +1,907 @@
+---
+title: "EDA"
+author: "Net Zhang"
+date: "2021/7/4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  paged.print=FALSE,
+  fig.width=12
+)
+library(opioidAction)
+library(tidyverse)
+library(patchwork)
+library(ggthemr)
+library(gridExtra)
+library(ggpmisc)
+library(lubridate)
+library(MASS)
+select <- dplyr::select
+ggthemr("fresh", layout = "clear", 
+        spacing = 1, type = "outer")
+personal_data <- personal_data() 
+kit_data <- kit_data()
+naloxone_usage_data <- naloxone_usage_data()
+program_data <- program_data()
+
+kit_join_personal <- 
+  kit_data %>%
+  left_join(
+    personal_data,
+    by = "obs_key"
+  )
+usage_join_personal <-
+  naloxone_usage_data %>%
+  left_join(
+    personal_data,
+    by = "obs_key"
+  )
+usage_join_program <-
+  naloxone_usage_data %>%
+  left_join(
+    program_data,
+    by = "obs_key"
+  )
+```
+
+
+# Descriptive Analysis
+
+## Kits distribution by demographics
+```{r}
+personal_data %>%
+  count(age) %>%
+  mutate(pct = percentage(n/nrow(personal_data)))
+
+personal_data %>%
+  count(ethnicity) %>%
+  mutate(pct = percentage(n/nrow(personal_data)))
+```
+
+
+```{r fig.width=12}
+plot_age_donut <-
+  personal_data %>%
+  plot_donut(birth_sex)
+
+plot_age_sex_bar <- 
+  personal_data %>%
+  plot_stack_bar(
+    var_x = age, var_fill = birth_sex,
+    title_x = "Age Group", title_y = NULL,
+    title_legend = "Assigned Sex"
+  ) +
+  ggtitle(
+    label = "Kits Distribution by Demographics: Age Group ~ Assigned Sex",
+    subtitle = "The kits distribution by age group is right-skewed. Individuals between 25 to 44 accounts for nearly 51% of the total kits' distribution. \nOverall, according to the birth sex of the available observation, 50.5% of the kits were distributed to females and 40.7% to males, \nwhich is roughly the same within most age groups."
+  )
+
+plot_age_sex_bar +
+  inset_element(
+    plot_age_donut,
+    left = 0.6, bottom = 0.5, right = 1, top = 1
+  ) 
+```
+
+
+```{r fig.width=12}
+personal_data %>%
+  count(ethnicity, age) %>%
+  mutate(
+    ethnicity = ifelse(ethnicity == "Prefer not to say", "Other", ethnicity),
+    ethnicity = factor(
+      ethnicity,
+      levels = c(
+        "White", "Black/African American", "Hispanic/Latino",
+        "Asian", "American Indian/Alaska Native", "Multi-racial/multi-ethnic (check all that apply)",
+        "Native Hawaiian/Pacific Islander", "Other", "Prefer not to say"
+      )
+    )
+  ) %>%
+  ggplot(aes(x = age, y = n)) +
+  geom_bar(stat = "identity", fill = "#E84646") +
+  geom_text(
+    aes(label = n),
+    position = position_stack(vjust = 0.5),
+    color = "black"
+  ) +
+  facet_wrap(~ethnicity, scales = "free_y", ncol = 2) +
+  labs(
+    x = "Age Group", y = NULL,
+    title = "Kits Distribution by Demographics: Age Group ~ Ethnicity",
+    subtitle = 
+      "* The kits were distributed mainly to the White ethnicity group (65.2%), which is 3 times higher than the second-largest ethnicity group, the Black and African American (22%).\n\n* The age distribution from 25 to 64 is more even and uniform within the Black and African American ethnicity group.\n\n* Data shows the distributions of the total number of kits distributed are all right-skewed in White, Hispanic/Latino, and Asian communities.\n\n  - The White and Hispanic/Latino have similar distributions where most of the kits were assigned to individuals between the age of 15 - 44.\n  - The age distribution within the Asian ethnicity group is more right-skewed than the other ethnicity groups. Most of the cases came from people between 15 to 34."
+  )
+```
+
+```{r fig.width=12}
+personal_data %>%
+  count(ethnicity, age, birth_sex) %>%
+  mutate(
+    ethnicity = ifelse(ethnicity == "Prefer not to say", "Other", ethnicity),
+    ethnicity = factor(
+      ethnicity,
+      levels = c(
+        "White", "Black/African American", "Hispanic/Latino",
+        "Asian", "American Indian/Alaska Native", "Multi-racial/multi-ethnic (check all that apply)",
+        "Native Hawaiian/Pacific Islander", "Other", "Prefer not to say"
+      )
+    )
+  ) %>%
+  ggplot(aes(x = age, y = n)) +
+  geom_bar(stat = "identity", aes(fill = birth_sex)) +
+  facet_wrap(~ethnicity, scales = "free_y", ncol = 2) +
+  labs(
+    x = "Age Group", y = NULL, fill = "Assigned Sex",
+    title = "Kits Distribution by Demographics: Age Group ~ Ethnicity ~ Assigned Sex ",
+    subtitle = NULL
+  )
+```
+
+
+## Time series analysis on kits distribution by demographics
+```{r fig.width=12}
+plot_ts_overall <- 
+  kit_data %>%
+  mutate(
+    yearmonth = tsibble::yearmonth(date)
+  ) %>%
+  group_by(yearmonth) %>%
+  summarise_at(vars(kit_number), sum) %>%
+  mutate(yearmonth = as.Date(yearmonth)) %>%
+  ggplot(aes(yearmonth, kit_number)) +
+  geom_line(size = 1.7, color = "#E84646") +
+  scale_x_date(breaks = "3 month") +
+  labs(x = NULL, y = "Number of kits distributed",
+       title = "Time Series of Kits Distributed: Monthly Aggregation")
+
+kit_join_personal %>%
+  mutate(
+    yearmonth = tsibble::yearmonth(date)
+  ) %>%
+  group_by(yearmonth, age) %>%
+  summarise_at(vars(kit_number), sum) %>%
+  filter(
+    !age %in% c("Prefer not to say", "0-14") 
+  ) %>%
+  mutate(yearmonth = as.Date(yearmonth)) %>%
+  ggplot(aes(yearmonth, kit_number)) +
+  geom_line(size = 1.7, aes(color = age)) +
+  geom_vline(xintercept = c(as.Date("2021-01-01"), as.Date("2021-02-01")), 
+             size = 1.2, color = "black", linetype = 2) +
+  scale_x_date(breaks = "3 month") +
+  labs(x = NULL, y = "Number of kits distributed",
+       title = "Time Series Analysis of Kits Distributed: Monthly Aggregation",
+       subtitle = "* The number of the distributed kits surges in Dec 2019. The surge stopped in Feb 2020, right before the COVID-19 pandemic. \n\n* Starting from March 2020, significant growth was observed. The total number of distributed kits reached its peak between Oct to Nov 2020. \n\n* The number had a steep drop after the peak in Oct 2020. However, the 25-34 age group, which is also the largest age group receiving kits, \n   experienced another surge in Jan 2021, while the other age groups are still dropping. Within less than a month, the number from the other \n   age groups began to follow the upgoing trend, leading to the second-largest surge since 2018. \n\n* The time series within each group are highly correlated. We suspect the early signal of an upgoing trend in the 25 - 34 age group could be \n   observed as an indicator of the general surges for all age groups.")
+
+```
+
+
+```{r fig.height=8}
+stockpile_table <- 
+  kit_data %>%
+  filter(
+    date >= ymd(20190401),
+    date <= ymd(20210401)
+  ) %>%
+  group_by(date) %>%
+  summarise_at(vars(kit_number), sum) %>%
+  mutate(
+    weekday = wday(date, week_start = 1, label = TRUE)
+  ) %>%
+  group_by(weekday) %>%
+  summarise_at(vars(kit_number), list(
+    `75 quantile` = ~ceiling(quantile(x = .x, probs = 0.75)),
+    `90 quantile` = ~ceiling(quantile(x = .x, probs = 0.90)),
+    `95 quantile` = ~ceiling(quantile(x = .x, probs = 0.95))
+  )) %>%
+  rename(
+    `Weekday Stockpile` = weekday
+  )
+
+plot_weekday <- kit_data %>%
+  filter(
+    date >= ymd(20190401),
+    date <= ymd(20210401)
+  ) %>%
+  group_by(date) %>%
+  summarise_at(vars(kit_number), sum) %>%
+  mutate(
+    weekday = wday(date, week_start = 1, label = TRUE)
+  ) %>%
+  ggplot(aes(x = weekday, y = kit_number)) +
+  geom_boxplot(aes(fill = weekday)) +
+  labs(x = NULL, y = "Number of kits distributed") +
+  theme(legend.position = "none") 
+
+plot_weekday_is_first <- kit_data %>%
+  filter(
+    date >= ymd(20190401),
+    date <= ymd(20210401)
+  ) %>%
+  group_by(date, is_first_naloxone_kit) %>%
+  summarise_at(vars(kit_number), sum) %>%
+  mutate(
+    weekday = wday(date, week_start = 1, label = TRUE)
+  ) %>%
+  ggplot(aes(x = weekday, y = kit_number)) +
+  geom_boxplot(aes(fill = is_first_naloxone_kit)) +
+  labs(x = NULL, y = "Number of kits distributed", 
+       fill = "Is this your first time using naloxone kits?"
+       ) +
+  theme(legend.position = "top") +
+  annotate(
+    geom = "table",
+    x = 7.5,
+    y = 210,
+    label = list(stockpile_table)
+  ) +
+  ggtitle(
+    label = "Time Series Analysis of Kits Distributed: Summarized by Weekdays",
+    subtitle = "* Summarize by days of the week, Wednesday has the highest number of kits distributed. Meanwhile, the percentage of the individual\n   with previous naloxone usage is around 55%, with the overall rate at 44%.\n\n* The stockpiling table is provided below. Numbers are estimated based on the quantiles generated from the corresponding distribution of the weekday. \n"
+  )
+
+wrap_plots(
+  A = plot_weekday_is_first, B = plot_weekday
+) +
+  plot_layout(ncol = 1, heights = c(1.5,1))
+```
+
+```{r}
+question_data <- 
+  personal_data %>%
+  dplyr::select(obs_key, contains("is")) %>%
+  pivot_longer(contains("is"), names_to = "question", values_to = "answer") 
+
+obs_with_no_health_insurance <- 
+  question_data %>%
+  filter(question == "is_acquire_health_insurance") %>%
+  filter(answer == "No") %>%
+  pull(obs_key)
+
+health_insurance_prop <- 
+  personal_data %>%
+  filter(obs_key %in% obs_with_no_health_insurance) %>% 
+  count(ethnicity) %>%
+  rename(no_health_insurance = n) %>%
+  left_join(
+    personal_data %>%
+      count(ethnicity) %>%
+      rename(all = n),
+    by = "ethnicity"
+  ) %>%
+  filter(
+    !ethnicity %in% c("Other", "Prefer not to say") 
+  ) %>%
+  mutate(
+    prop = no_health_insurance/all
+  )
+
+plot_insurance <- 
+  health_insurance_prop %>%
+  mutate(
+    ethnicity = ifelse(str_detect(ethnicity, "Multi"), "Multi-racial", ethnicity),
+    ethnicity = forcats::fct_reorder(ethnicity, -prop)
+  ) %>%
+  ggplot(aes(x = ethnicity, 
+             y = prop)) +
+  geom_bar(stat = "identity", fill = "#E84646") +
+  geom_text(
+    aes(label = percentage(prop)),
+    position = position_stack(vjust = 0.5),
+    color = "white",
+    size = 6
+  ) +
+  labs(x = NULL, y = NULL) +
+  ggtitle(
+    label = "Personal Question: Health Insurance?",
+    subtitle = "Overall, nearly 20% of the individuals do not have health insurance. \nWithin each ethinicity group, the Hispanic and Latino community has the highest rate of not acquiring health insurance."
+  )
+```
+
+
+
+```{r}
+obs_overdosed <- question_data %>%
+  filter(question == "is_ever_overdosed") %>%
+  filter(answer == "Yes") %>%
+  pull(obs_key)
+
+overdosed_prop <- personal_data %>%
+  filter(obs_key %in% obs_overdosed) %>% 
+  count(ethnicity) %>%
+  rename(overdosed = n) %>%
+  left_join(
+    personal_data %>%
+      count(ethnicity) %>%
+      rename(all = n),
+    by = "ethnicity"
+  ) %>%
+  filter(
+    !ethnicity %in% c("Other", "Prefer not to say") 
+  ) %>%
+  mutate(
+    prop = overdosed/all
+  )
+
+
+plot_overdosed <- 
+  overdosed_prop %>%
+  mutate(
+    ethnicity = ifelse(str_detect(ethnicity, "Multi"), "Multi-racial", ethnicity),
+    ethnicity = forcats::fct_reorder(ethnicity, -prop)
+  ) %>%
+  ggplot(aes(x = ethnicity, 
+             y = prop)) +
+  geom_bar(stat = "identity", fill = "#E84646") +
+  geom_text(
+    aes(label = percentage(prop)),
+    position = position_stack(vjust = 0.5),
+    color = "white",
+    size = 6
+  ) +
+  labs(x = NULL, y = NULL) +
+  ggtitle(
+    label = "Personal Question: Overdosed Before?",
+    subtitle = "Among the white ethnicity, 29% of the individuals who received the kits have overdosed before.\nHowever, comparing to the dominant sample size of the white ethnicity group, although the overall sample size of the \nAmerican Indian, Alaska Native, Native Hawaiian, and Pacific Islander ethnicity group are small, it appears that they also \ntend to have high overdose rate in their record."
+  )
+```
+
+```{r}
+wrap_plots(
+  A = plot_insurance, B = plot_overdosed
+) +
+  plot_layout(ncol = 1, heights = c(1,1))
+```
+
+```{r}
+naloxone_usage_data %>%
+  summarise_all(mean)
+```
+
+```{r fig.height=12}
+plot_usage_ethnicity <- 
+  usage_join_personal %>%
+  mutate(
+    ethnicity = ifelse(ethnicity == "Prefer not to say", "Other", ethnicity),
+    ethnicity = factor(
+      ethnicity,
+      levels = c(
+        "White", "Black/African American", "Hispanic/Latino",
+        "Asian", "American Indian/Alaska Native", "Multi-racial/multi-ethnic (check all that apply)",
+        "Native Hawaiian/Pacific Islander", "Other", "Prefer not to say"
+      )
+    )
+  ) %>%
+  dplyr::select(
+    obs_key, starts_with("naloxone_usage"), ethnicity
+  ) %>%
+  set_names(
+    c("obs_key", "Self Overdose", "Family or Friend", "See Some Overdose", "ethnicity")
+  ) %>%
+  pivot_longer(c(2:4), names_to = "nalxone_usage_type", values_to = "usage_result") %>%
+  filter(usage_result == TRUE) %>%
+  group_by(ethnicity, nalxone_usage_type) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  ggplot(aes(x = nalxone_usage_type, y = n)) +
+  geom_bar(stat = "identity", fill = "#E84646") +
+  geom_text(
+    aes(label = n),
+    position = position_stack(vjust = 0.5),
+    color = "black"
+  ) +
+  facet_wrap(~ethnicity, scales = "free_y", ncol = 2) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Naloxone Kit Usage Distribution By Ethinicity Group"
+  )
+plot_usage_age <- 
+  usage_join_personal %>%
+  dplyr::select(
+    obs_key, starts_with("naloxone_usage"), age
+  ) %>%
+  set_names(
+    c("obs_key", "Self Overdose", "Family or Friend", "See Some Overdose", "age")
+  ) %>%
+  pivot_longer(c(2:4), names_to = "nalxone_usage_type", values_to = "usage_result") %>%
+  filter(usage_result == TRUE) %>%
+  group_by(age, nalxone_usage_type) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  ggplot(aes(x = nalxone_usage_type, y = n)) +
+  geom_bar(stat = "identity", fill = "#233B43") +
+  geom_text(
+    aes(label = n),
+    position = position_stack(vjust = 0.5),
+    color = "white"
+  ) +
+  facet_wrap(~age, scales = "free_y", ncol = 2) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Naloxone Kit Usage Distribution By Age Group"
+  )
+
+wrap_plots(plot_usage_ethnicity,plot_usage_age, ncol = 1)
+
+major_programs <- 
+  usage_join_program %>%
+  count(program) %>%
+  arrange(-n) %>%
+  mutate(
+    prop = n/nrow(program_data),
+    prop = cumsum(prop)
+  ) %>%
+  head(6) %>%
+  pull(program)
+
+usage_join_program %>%
+  filter(program %in% major_programs) %>%
+  dplyr::select(
+    obs_key, starts_with("naloxone_usage"), program
+  ) %>%
+  set_names(
+    c("obs_key", "Self Overdose", "Family or Friend", "See Some Overdose", "program")
+  ) %>%
+  pivot_longer(c(2:4), names_to = "nalxone_usage_type", values_to = "usage_result") %>%
+  filter(usage_result == TRUE) %>%
+  group_by(program, nalxone_usage_type) %>%
+  summarise(usage_type_count = n(), .groups = "drop") %>%
+  add_count(program, wt = usage_type_count) %>%
+  mutate(
+    prop = usage_type_count/n
+  ) %>%
+  ggplot(aes(x = nalxone_usage_type, y = usage_type_count)) +
+  geom_bar(stat = "identity", fill = "#233B43") +
+  geom_text(
+    aes(label = percentage(prop)),
+    position = position_stack(vjust = 0.5),
+    color = "white"
+  ) +
+  facet_wrap(~program, scales = "free_y", ncol = 2) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Naloxone Kit Usage Distribution By Organization"
+  )
+
+```
+
+
+
+# Model: Number of Kits
+
+* First time
+* Second Time
+* 3 - 5
+* More than 5
+
+```{r}
+number_levels <- 
+  c("One Kit", "Two Kits", "3+ Kits")
+
+ethnicity_levels <-
+  c(
+    "Native Hawaiian/Pacific Islander",
+    "American Indian/Alaska Native",
+    "Multi-racial",
+    "Hispanic/Latino",
+    "White",
+    "Black/African American",
+    "Asian",
+    "Other",
+    "Prefer not to say"
+  )
+age_levels <-
+  c("0-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65+", "Prefer not to say")
+
+birth_sex_levels <- 
+  c("Female", "Male", "Prefer not to say")
+
+n_overdose_witness_levels <-
+  c("0 (never)", "10-Jan", "Less than 10", "More than 10", "Prefer not to say")
+
+yes_no_levels <-
+  c("Yes", "No")
+
+
+model_data <-
+  kit_data() %>%
+  mutate(
+    kit_number_fac = case_when(
+      # kit_number <= 1 ~ factor("One Kit", levels = number_levels),
+      # kit_number == 2 ~ factor("Two Kits", levels = number_levels),
+      # kit_number >= 3 ~ factor("3+ Kits", levels = number_levels)
+      kit_number <= 1 ~ factor("One Kit", levels = number_levels),
+      kit_number == 2 ~ factor("Two Kits", levels = number_levels),
+      kit_number >= 3 ~ factor("3+ Kits", levels = number_levels)
+    )
+  ) %>%
+  # Response and is first question
+  dplyr::select(
+    obs_key, kit_number_fac, is_first_naloxone_kit
+  ) %>%
+  # Usage Feature
+  left_join(
+    naloxone_usage_data,
+    by = "obs_key"
+  ) %>%
+  # Demographics Features & Personal Questions
+  left_join(
+    personal_data,
+    by = "obs_key"
+  ) %>%
+  mutate(
+    ethnicity = ifelse(str_detect(ethnicity, "Multi"), "Multi-racial", ethnicity),
+    ethnicity = factor(ethnicity, ethnicity_levels),
+    county_of_residence = ifelse(str_detect(county_of_residence, "Franklin"), 
+                                 "Franklin", "Not in Franklin"),
+    age = factor(age, age_levels),
+    birth_sex = factor(birth_sex, birth_sex_levels),
+    n_overdose_witness = factor(n_overdose_witness, n_overdose_witness_levels),
+    is_acquire_health_insurance = ifelse(
+      str_detect(is_acquire_health_insurance, "Yes"), 
+      factor("Yes", yes_no_levels),
+      factor("No", yes_no_levels)
+    ),
+    is_released_jail_30 = ifelse(
+      str_detect(is_released_jail_30, "Yes"), 
+      factor("Yes", yes_no_levels),
+      factor("No", yes_no_levels)
+    ),
+    is_released_inpatient_30 = ifelse(
+      str_detect(is_released_inpatient_30, "Yes"), 
+      factor("Yes", yes_no_levels),
+      factor("No", yes_no_levels)
+    ),
+    is_formal_treatment_program = ifelse(
+      str_detect(is_formal_treatment_program, "Yes"), 
+      factor("Yes", yes_no_levels),
+      factor("No", yes_no_levels)
+    ),
+    is_had_iv_drug = ifelse(
+      str_detect(is_had_iv_drug, "Yes"), 
+      factor("Yes", yes_no_levels),
+      factor("No", yes_no_levels)
+    ),
+    is_ever_overdosed = ifelse(
+      str_detect(is_ever_overdosed, "Yes"), 
+      factor("Yes", yes_no_levels),
+      factor("No", yes_no_levels)
+    )
+  ) %>%
+  # Clean & Filter
+  filter(
+    is_first_naloxone_kit != "Undisclosed",
+    is_released_jail_30 != "Unknown",
+    is_formal_treatment_program != "Unknown",
+    is_released_inpatient_30 != "Unknown",
+    is_had_iv_drug != "Unknown",
+    is_ever_overdosed != "Unknown",
+    age != factor("Prefer not to say", age_levels),
+    birth_sex != factor("Prefer not to say", birth_sex_levels),
+    n_overdose_witness != factor("Prefer not to say", n_overdose_witness_levels),
+    ethnicity != factor("Prefer not to say", ethnicity_levels)
+  )
+
+# After testing, ethnicity was not a significant feature 
+model_data <- model_data %>% 
+  dplyr::select(-ethnicity, 
+                -is_released_jail_30, -is_released_inpatient_30)
+
+model_data_summarized <-
+  model_data %>%
+  dplyr::select(-obs_key) %>%
+  group_by_all() %>%
+  summarise(n = n(), .groups = "drop")
+
+predictors <- 
+  colnames(model_data_summarized)[2:13] # Hard code notice here
+
+model_formula <-
+  as.formula(
+    paste0(
+      "kit_number_fac ~ ",
+      str_c(predictors, collapse = " + ")
+    )
+  )
+
+
+prop.odds.model <-
+  polr(model_formula, weights = n, data = model_data_summarized, Hess = TRUE)
+
+summary_info <- summary(prop.odds.model)
+coef_significant_table <- 
+  summary_info$coefficients %>%
+  as_tibble(rownames = "coef") %>%
+  mutate(
+    p_value = 2*pnorm(-abs(`t value`)),
+    significant = ifelse(p_value > 0.05, FALSE, TRUE)
+  )
+summary_info
+```
+
+# Binomial Logistic Model: One Kit, 2+ Kit
+```{r}
+binom_number_levels <- c("One Kit", "2+ Kits")
+age_agg_levels <- c("15-24", "25-44", "45-64", "65+", "Prefer not to say")
+model_data <-
+  kit_data() %>%
+  mutate(
+    kit_number_fac = case_when(
+      # kit_number <= 1 ~ factor("One Kit", levels = number_levels),
+      # kit_number == 2 ~ factor("Two Kits", levels = number_levels),
+      # kit_number >= 3 ~ factor("3+ Kits", levels = number_levels)
+      kit_number <= 1 ~ factor("One Kit", levels = binom_number_levels),
+      kit_number >= 2 ~ factor("2+ Kits", levels = binom_number_levels)
+    )
+  ) %>%
+  # Response and is first question
+  dplyr::select(
+    obs_key, kit_number_fac, is_first_naloxone_kit
+  ) %>%
+  # Usage Feature
+  left_join(
+    naloxone_usage_data,
+    by = "obs_key"
+  ) %>%
+  # Demographics Features & Personal Questions
+  left_join(
+    personal_data,
+    by = "obs_key"
+  ) %>%
+  mutate(
+    ethnicity = ifelse(str_detect(ethnicity, "Multi"), "Multi-racial", ethnicity),
+    ethnicity = factor(ethnicity, ethnicity_levels),
+    county_of_residence = ifelse(str_detect(county_of_residence, "Franklin"), 
+                                 "Franklin", "Not in Franklin"),
+    #age = factor(age, age_levels),
+    age = case_when(
+      age == "0-14" ~ factor("15-24", age_agg_levels),
+      age == "15-24" ~ factor("15-24", age_agg_levels),
+      age == "25-34" ~ factor("25-44", age_agg_levels),
+      age == "35-44" ~ factor("25-44", age_agg_levels),
+      age == "45-54" ~ factor("45-64", age_agg_levels),
+      age == "55-64" ~ factor("45-64", age_agg_levels),
+      age == "65+" ~ factor("65+", age_agg_levels),
+      age == "Prefer not to say" ~ factor("Prefer not to say", age_agg_levels)
+    ),
+    birth_sex = factor(birth_sex, birth_sex_levels),
+    n_overdose_witness = factor(n_overdose_witness, n_overdose_witness_levels),
+    is_acquire_health_insurance = ifelse(
+      str_detect(is_acquire_health_insurance, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_released_jail_30 = ifelse(
+      str_detect(is_released_jail_30, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_released_inpatient_30 = ifelse(
+      str_detect(is_released_inpatient_30, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_formal_treatment_program = ifelse(
+      str_detect(is_formal_treatment_program, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_had_iv_drug = ifelse(
+      str_detect(is_had_iv_drug, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_ever_overdosed = ifelse(
+      str_detect(is_ever_overdosed, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    )
+  ) %>%
+  # Clean & Filter
+  filter(
+    is_first_naloxone_kit != "Undisclosed",
+    is_released_jail_30 != "Unknown",
+    is_formal_treatment_program != "Unknown",
+    is_released_inpatient_30 != "Unknown",
+    is_had_iv_drug != "Unknown",
+    is_ever_overdosed != "Unknown",
+    age != factor("Prefer not to say", age_agg_levels),
+    birth_sex != factor("Prefer not to say", birth_sex_levels),
+    n_overdose_witness != factor("Prefer not to say", n_overdose_witness_levels),
+    ethnicity != factor("Prefer not to say", ethnicity_levels)
+  )
+
+# After testing, ethnicity was not a significant feature 
+# Same as age
+model_data <- model_data %>% 
+  dplyr::select(-ethnicity, -age,
+                -is_released_jail_30, -is_released_inpatient_30)
+
+# model_data_summarized <-
+#   model_data %>%
+#   dplyr::select(-obs_key) %>%
+#   group_by_all() %>%
+#   summarise(n = n(), .groups = "drop")
+
+predictors <- 
+  colnames(model_data)[2:13] # Hard code notice here
+
+model_formula <-
+  as.formula(
+    paste0(
+      "kit_number_fac ~ ",
+      str_c(predictors, collapse = " + ")
+    )
+  )
+
+glm_model <-
+  glm(model_formula, data = model_data, family = "binomial")
+
+summary(glm_model)
+```
+
+
+```{r}
+# Binomial Logistic Model: Is this your first time using this kit?
+
+response_levels <- c("Yes", "No", "Undisclosed")
+binom_number_levels <- c("One Kit", "2+ Kits")
+age_agg_levels <- c("15-24", "25-44", "45-64", "65+", "Prefer not to say")
+
+
+model_data <- 
+  kit_data() %>%
+  filter(is_first_naloxone_kit != factor("Undisclosed", response_levels)) %>%
+  mutate(
+    kit_number_fac = case_when(
+      # kit_number <= 1 ~ factor("One Kit", levels = number_levels),
+      # kit_number == 2 ~ factor("Two Kits", levels = number_levels),
+      # kit_number >= 3 ~ factor("3+ Kits", levels = number_levels)
+      kit_number <= 1 ~ factor("One Kit", levels = binom_number_levels),
+      kit_number >= 2 ~ factor("2+ Kits", levels = binom_number_levels)
+    ),
+    is_wednesday = (wday(date, week_start = 1) == 3)
+  ) %>%
+  select(
+    obs_key, is_first_naloxone_kit, kit_number_fac, is_wednesday
+  ) %>%
+  # Usage Feature
+  left_join(
+    naloxone_usage_data,
+    by = "obs_key"
+  ) %>%
+  # Demographics Features & Personal Questions
+  left_join(
+    personal_data,
+    by = "obs_key"
+  ) %>%
+  mutate(
+    #ethnicity = ifelse(str_detect(ethnicity, "Multi"), "Multi-racial", ethnicity),
+    #ethnicity = factor(ethnicity, ethnicity_levels),
+    ethnicity_asian = str_detect(ethnicity, "Asian"),
+    county_of_residence = ifelse(str_detect(county_of_residence, "Franklin"), 
+                                 "Franklin", "Not in Franklin"),
+    age = case_when(
+      age == "0-14" ~ factor("15-24", age_agg_levels),
+      age == "15-24" ~ factor("15-24", age_agg_levels),
+      age == "25-34" ~ factor("25-44", age_agg_levels),
+      age == "35-44" ~ factor("25-44", age_agg_levels),
+      age == "45-54" ~ factor("45-64", age_agg_levels),
+      age == "55-64" ~ factor("45-64", age_agg_levels),
+      age == "65+" ~ factor("65+", age_agg_levels),
+      age == "Prefer not to say" ~ factor("Prefer not to say", age_agg_levels)
+    ),
+    
+    birth_sex = factor(birth_sex, birth_sex_levels),
+    n_overdose_witness = factor(n_overdose_witness, n_overdose_witness_levels),
+    
+    is_acquire_health_insurance = ifelse(
+      str_detect(is_acquire_health_insurance, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_released_jail_30 = ifelse(
+      str_detect(is_released_jail_30, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_released_inpatient_30 = ifelse(
+      str_detect(is_released_inpatient_30, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_formal_treatment_program = ifelse(
+      str_detect(is_formal_treatment_program, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_had_iv_drug = ifelse(
+      str_detect(is_had_iv_drug, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    ),
+    is_ever_overdosed = ifelse(
+      str_detect(is_ever_overdosed, "Yes"), 
+      # factor("Yes", yes_no_levels),
+      # factor("No", yes_no_levels)
+      TRUE, FALSE
+    )
+  ) %>%
+  filter(
+    age != factor("Prefer not to say", age_agg_levels),
+    birth_sex != factor("Prefer not to say", birth_sex_levels),
+    n_overdose_witness != factor("Prefer not to say", n_overdose_witness_levels),
+    ethnicity != factor("Prefer not to say", ethnicity_levels)
+  )
+  
+
+model_data <- 
+  model_data %>%
+  dplyr::select(-ethnicity, -birth_sex, 
+                -county_of_residence,
+                -is_released_inpatient_30)
+
+predictors <- colnames(model_data)[2:15]
+
+model_formula <-
+  as.formula(
+    paste0(
+      "is_first_naloxone_kit ~ ",
+      str_c(predictors, collapse = " + ")
+    )
+  )
+
+glm_model <-
+  glm(model_formula, data = model_data, family = "binomial")
+
+summary(glm_model)
+```
+
+```{r}
+exp(-0.66532)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
