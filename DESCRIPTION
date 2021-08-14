@@ -20,6 +20,7 @@ Imports:
     dplyr,
     ggplot2,
     highcharter,
+    htmlwidgets,
     lubridate,
     magrittr,
     opioidAction,
@@ -30,5 +31,6 @@ Imports:
     shinyjs,
     shinyWidgets,
     stringr,
+    tidyr,
     tools,
     tsibble

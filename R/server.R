@@ -20,5 +20,5 @@ server <- function(input, output, session) {
     )
 
   kit_distribution_ts_server("kit_ts", kit_join_personal = kit_join_personal)
-  demographicsServer("demographics")
+  demographicsServer("demo", kit_join_personal = kit_join_personal)
 }
