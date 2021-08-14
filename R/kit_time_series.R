@@ -30,6 +30,9 @@ kit_distribution_ts_ui <- function(id) {
 kit_distribution_ts_server <-
   function(id, kit_join_personal) {
     shiny::moduleServer(id, function(input, output, session) {
+
+      chart_theme_function <- highcharter::hc_theme_flat
+
       output$kit_ts_plot <-
         highcharter::renderHighchart({
           shiny::req(input$group_level_1)
@@ -115,6 +118,9 @@ kit_distribution_ts_server <-
             highcharter::hc_exporting(
               enabled = TRUE,
               filename = "kit_time_series"
+            ) %>%
+            highcharter::hc_add_theme(
+              chart_theme_function()
             )
         })
 

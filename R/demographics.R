@@ -38,6 +38,9 @@ demographicsServer <-
   function(id, kit_join_personal) {
     shiny::moduleServer(id, function(input, output, session) {
 
+      chart_theme_function <- highcharter::hc_theme_flat
+
+
       output$demo_plot_single <-
         #apexcharter::renderApexchart({
         highcharter::renderHighchart({
@@ -47,7 +50,10 @@ demographicsServer <-
           #print(kit_join_personal)
           first_group_var <- c(input$group_level)[1]
           p <- plot_group(kit_join_personal, first_group_var)
-          p
+          p %>%
+            highcharter::hc_add_theme(
+              chart_theme_function()
+            )
 
         })
 
@@ -157,7 +163,11 @@ plot_group <- function(data, group_var) {
           facet_plot_object %>%
             highcharter::hc_title(text = facet_title) %>%
             highcharter::hc_xAxis(title = list(text = "")) %>%
-            highcharter::hc_yAxis(title = list(text = ""))
+            highcharter::hc_yAxis(title = list(text = ""))  %>%
+            highcharter::hc_add_theme(
+              #chart_theme_function()
+              highcharter::hc_theme_flat()
+            )
 
         },
         age_key = age_key, facet_var = facet_var) %>%
