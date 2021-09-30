@@ -24,7 +24,6 @@ Imports:
     janitor,
     lubridate,
     magrittr,
-    opioidAction,
     purrr,
     readr,
     rlang,
