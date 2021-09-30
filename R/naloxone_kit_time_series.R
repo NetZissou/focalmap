@@ -1,4 +1,4 @@
-kit_distribution_ts_ui <- function(id) {
+naloxoneDistributionSeriesUI <- function(id) {
 
   shinydashboard::box(
     title = "Time Series of Naloxone Kits Distribution",
@@ -27,7 +27,7 @@ kit_distribution_ts_ui <- function(id) {
 }
 
 #' @importFrom rlang ".data"
-kit_distribution_ts_server <-
+naloxoneDistributionSeriesServer <-
   function(id, kit_join_personal) {
     shiny::moduleServer(id, function(input, output, session) {
 

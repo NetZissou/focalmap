@@ -1,4 +1,21 @@
-
+#' Load focused indicators  extracted from naloxone intake form
+#'
+#' @param dir data directory on OSC that contains all of the naloxone intake forms data
+#'
+#' @return focused naloxone intake forms indicators
+#' @export
+#'
+#' @examples
+#' project_dawn_focused_indicators()
+project_dawn_focused_indicators <- function(dir = opioidDashboard::NALOXONE_DATA_DIRECTORY) {
+  data_name <- "project_dawn_focused_indicators.RData"
+  data_path <- paste0(dir, "/", data_name)
+  data <- load(data_path)
+  return(
+    get(data) %>%
+      tibble::as_tibble()
+  )
+}
 #' Load personal data extracted from naloxone intake form
 #'
 #' @param dir data directory on OSC that contains all of the naloxone intake forms data

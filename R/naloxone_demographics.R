@@ -1,4 +1,4 @@
-demographicsUI <- function(id) {
+naloxoneDemographicsUI <- function(id) {
 
   shinydashboard::box(
     title = "Kit Distribution by Demographics",
@@ -34,7 +34,7 @@ demographicsUI <- function(id) {
 }
 
 
-demographicsServer <-
+naloxoneDemographicsServer <-
   function(id, kit_join_personal) {
     shiny::moduleServer(id, function(input, output, session) {
 
