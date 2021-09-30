@@ -3,5 +3,5 @@
 #' data preparation package
 "NALOXONE_DATA_DIRECTORY"
 
-# Contains the data directory of opioid overdose data
+#' Contains the data directory of opioid overdose data
 "OPIOID_OVERDOSE_DATA_DIRECTORY"
