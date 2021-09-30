@@ -7,10 +7,10 @@
 #' @export
 server <- function(input, output, session) {
   # bslib::bs_themer()
-  personal_data <- opioidAction::personal_data()
-  kit_data <- opioidAction::kit_data()
-  naloxone_usage_data <- opioidAction::naloxone_usage_data()
-  program_data <- opioidAction::program_data()
+  personal_data <- personal_data()
+  kit_data <- kit_data()
+  naloxone_usage_data <- naloxone_usage_data()
+  program_data <- program_data()
 
   kit_join_personal <-
     kit_data %>%

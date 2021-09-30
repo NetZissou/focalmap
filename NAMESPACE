@@ -2,6 +2,10 @@
 
 export("%>%")
 export(app)
+export(kit_data)
+export(naloxone_usage_data)
+export(personal_data)
+export(program_data)
 export(server)
 export(ui)
 importFrom(magrittr,"%>%")
