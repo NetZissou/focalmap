@@ -19,6 +19,6 @@ server <- function(input, output, session) {
       by = "obs_key"
     )
 
-  kit_distribution_ts_server("kit_ts", kit_join_personal = kit_join_personal)
-  demographicsServer("demo", kit_join_personal = kit_join_personal)
+  naloxoneDistributionSeriesServer("kit_ts", kit_join_personal = kit_join_personal)
+  naloxoneDemographicsServer("demo", kit_join_personal = kit_join_personal)
 }

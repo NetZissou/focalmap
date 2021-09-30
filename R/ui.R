@@ -18,10 +18,10 @@ ui <- function() {
     # ========================================================= #
     shiny::tabPanel(title = "Naloxone Intake Forms",
                     shiny::fluidRow(
-                      kit_distribution_ts_ui("kit_ts")
+                      naloxoneDistributionSeriesUI("kit_ts")
                     ),
                     shiny::fluidRow(
-                      demographicsUI("demo")
+                      naloxoneDemographicsUI("demo")
                     )
     ),
     # ========================================================= #
