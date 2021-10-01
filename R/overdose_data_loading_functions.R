@@ -24,6 +24,10 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
   data <-
     data %>%
     dplyr::mutate(
+      # Use regex to extract valid text
+      race = stringr::str_extract(
+        .data$race, pattern = "[a-zA-Z ]+"
+      ),
       # ethnicity 98% missing
       hispanic_or_latino = !is.na(.data$ethnicity),
       # location_type 20% missing
