@@ -9,6 +9,7 @@ ui <- function() {
 
     shinyjs::useShinyjs(),
     shinyWidgets::useShinydashboard(),
+    shinyWidgets::useShinydashboardPlus(),
 
     theme = bslib::bs_theme() %>%
       bslib::bs_theme_update(bootswatch = "yeti"),
@@ -28,6 +29,8 @@ ui <- function() {
     # ------------ Tab: Naloxone Intake Forms -----------------
     # ========================================================= #
     shiny::tabPanel(title = "Overdose Map",
+
+                    overdoseFiltersUI("overdose_filters")
 
     )
 

@@ -21,4 +21,6 @@ server <- function(input, output, session) {
 
   naloxoneDistributionSeriesServer("kit_ts", kit_join_personal = kit_join_personal)
   naloxoneDemographicsServer("demo", kit_join_personal = kit_join_personal)
+
+  overdoseFiltersServer("overdose_filters")
 }
