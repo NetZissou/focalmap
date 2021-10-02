@@ -58,7 +58,10 @@ zip_tbl <-
   ) %>%
   dplyr::filter(.data$n > 10)
 
-filter_selection_zip <- zip_tbl$zip
+filter_selection_zip <- c(
+  "",
+  zip_tbl$zip
+)
 
 # location type
 location_type_tbl <-
