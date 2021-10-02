@@ -1,7 +1,7 @@
 overdoseFiltersUI <- function(id) {
 
   shinydashboardPlus::box(
-    title = "Filter", solidHeader = TRUE, width = 12,
+    title = "Filters", solidHeader = TRUE, width = 12,
     collapsed = FALSE, collapsible = TRUE,
     id = shiny::NS(id, "filter_box"),
 
@@ -107,6 +107,7 @@ overdoseFiltersUI <- function(id) {
         width = 12,
         shiny::helpText("Make a subset of the opioid overdose data using the filters above. "),
         shiny::helpText("When you finish tuning, click the apply button below to activate those filter criteria. "),
+        shiny::helpText("To reset all filters, click the reset button below and follow the apply button to receive all data available. "),
         shiny::br()
       )
     ),
