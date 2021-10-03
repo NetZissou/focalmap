@@ -38,7 +38,7 @@ opioidOverdoseFiltersUI <- function(id) {
         width = 4,
         shiny::dateRangeInput(
           inputId = shiny::NS(id, "date_range"),
-          label = "Date Range",
+          label = "Date Range (Jan/1st/2008 - July/17th/2021)",
           min = "2008-01-01",
           max = "2021-07-17"
         )
@@ -210,6 +210,15 @@ opioidOverdoseFiltersServer <- function(id) {
           filtered_overdose_data$data %>%
           dplyr::filter(
             .data$race %in% input$ethnicity
+          )
+      }
+
+      if (!nothing_selected(input$date_range)) {
+        filtered_overdose_data$data <-
+          filtered_overdose_data$data %>%
+          dplyr::filter(
+            .data$date >= lubridate::ymd(input$date_range[1]),
+            .data$date <= lubridate::ymd(input$date_range[2])
           )
       }
 
