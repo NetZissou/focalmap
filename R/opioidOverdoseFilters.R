@@ -1,4 +1,4 @@
-overdoseFiltersUI <- function(id) {
+opioidOverdoseFiltersUI <- function(id) {
 
   shinydashboardPlus::box(
     title = "Filters", solidHeader = TRUE, width = 12,
@@ -135,7 +135,7 @@ overdoseFiltersUI <- function(id) {
   )
 }
 
-overdoseFiltersServer <- function(id) {
+opioidOverdoseFiltersServer <- function(id) {
 
   shiny::moduleServer(id, function(input, output, session){
 
@@ -270,7 +270,7 @@ overdoseFiltersServer <- function(id) {
     })
 
     return(
-      opioid_overdose_data_all
+      filtered_overdose_data
     )
 
   })

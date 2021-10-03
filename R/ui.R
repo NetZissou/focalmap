@@ -5,7 +5,7 @@
 ui <- function() {
   shiny::navbarPage(
     title = "FOCAL MAP SECURED",
-    selected = "Overdose Map", id = "navbar",
+    selected = "Opioid Overdose Map", id = "navbar",
 
     shinyjs::useShinyjs(),
     shinyWidgets::useShinydashboard(),
@@ -17,9 +17,15 @@ ui <- function() {
     # ========================================================= #
     # ------------ Tab: Naloxone Intake Forms -----------------
     # ========================================================= #
-    shiny::tabPanel(title = "Overdose Map",
+    shiny::tabPanel(title = "Opioid Overdose Map",
 
-                    overdoseFiltersUI("overdose_filters")
+                    shiny::fluidRow(
+
+                      # column
+                    ),
+
+                    opioidOverdoseFiltersUI("overdose_filters"),
+                    opioidOverdoseMapUI("opioid_overdose_map")
 
     ),
 
