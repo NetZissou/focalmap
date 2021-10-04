@@ -47,5 +47,5 @@ COPY opioidDashboard.Rproj /tmp/build
 COPY DESCRIPTION /tmp/build
 
 RUN cd /tmp/build; Rscript -e "library ('devtools'); install()"
+COPY entrypoint.R /entrypoint.R
 
-ENTRYPOINT Rscript -e "library ('devtools'); load_all(); app();"
