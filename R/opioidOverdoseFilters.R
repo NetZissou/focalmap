@@ -40,7 +40,9 @@ opioidOverdoseFiltersUI <- function(id) {
           inputId = shiny::NS(id, "date_range"),
           label = "Date Range (Jan/1st/2008 - July/17th/2021)",
           min = "2008-01-01",
-          max = "2021-07-17"
+          max = "2021-07-17",
+          start = "2020-01-01",
+          end = "2021-07-17"
         )
       )
     ),
@@ -115,20 +117,20 @@ opioidOverdoseFiltersUI <- function(id) {
     shiny::fluidRow(
 
       shiny::column(
-        width = 2,
+        width = 1,
         shiny::actionButton(shiny::NS(id, "apply_filters"), label = "Apply filters")
       ),
       shiny::column(
-        width = 2,
+        width = 1,
         shiny::actionButton(shiny::NS(id, "reset_filters"), label = "Reset filters")
       ),
       shiny::column(
-        width = 2,
+        width = 1,
         shiny::actionButton(shiny::NS(id, "collapse_filter_box"), label = "Hide filters")
       ),
       shiny::column(
-        width = 2,
-        shiny::downloadButton(shiny::NS(id, "download_filtered_data"), label = "Store filtered data")
+        width = 1,
+        shiny::downloadButton(shiny::NS(id, "download_filtered_data"), label = "Download data", icon = NULL)
       )
     )
 
