@@ -28,6 +28,7 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data) {
 
       leaflet::leaflet() %>%
         leaflet::addTiles() %>%
+        leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) %>%
         leaflet::fitBounds(
           lng1 = opioid_overdose_map_init_bounds$min_lng,
           lat1 = opioid_overdose_map_init_bounds$min_lat,
