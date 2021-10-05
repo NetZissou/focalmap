@@ -14,9 +14,31 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports: 
+    apexcharter,
+    bslib,
+    devtools,
     dplyr,
     ggplot2,
+    highcharter,
+    htmlwidgets,
+    janitor,
+    leaflet,
+    lubridate,
     magrittr,
     purrr,
+    readr,
     rlang,
-    shiny
+    scales,
+    shiny,
+    shinyalert,
+    shinydashboard,
+    shinydashboardPlus,
+    shinyjs,
+    shinyWidgets,
+    stringr,
+    tibble,
+    tidyr,
+    tools,
+    tsibble
+Depends: 
+    R (>= 2.10)
