@@ -54,6 +54,10 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
       !is.na(.data$date),
       !is.na(.data$latitude),
       !is.na(.data$longitude)
+    ) %>%
+    dplyr::rename(
+      lat = .data$latitude,
+      lng = .data$longitude
     )
   return(
     data

@@ -4,14 +4,30 @@
 #' @export
 ui <- function() {
   shiny::navbarPage(
-    title = "Opioid Tool",
-    selected = "Naloxone Intake Forms", id = "navbar",
+    title = "FOCAL MAP SECURED",
+    selected = "Opioid Overdose Map", id = "navbar",
 
     shinyjs::useShinyjs(),
     shinyWidgets::useShinydashboard(),
+    shinyWidgets::useShinydashboardPlus(),
+    shinyalert::useShinyalert(),
 
-    theme = bslib::bs_theme() %>%
-      bslib::bs_theme_update(bootswatch = "yeti"),
+    theme = bslib::bs_theme(bootswatch = "materia", font_scale = 1.1),
+
+    # ========================================================= #
+    # ------------ Tab: Naloxone Intake Forms -----------------
+    # ========================================================= #
+    shiny::tabPanel(title = "Opioid Overdose Map",
+
+                    shiny::fluidRow(
+
+                      # column
+                    ),
+
+                    opioidOverdoseFiltersUI("overdose_filters"),
+                    opioidOverdoseMapUI("opioid_overdose_map")
+
+    ),
 
     # ========================================================= #
     # ------------ Tab: Naloxone Intake Forms -----------------
@@ -23,12 +39,6 @@ ui <- function() {
                     shiny::fluidRow(
                       naloxoneDemographicsUI("demo")
                     )
-    ),
-    # ========================================================= #
-    # ------------ Tab: Naloxone Intake Forms -----------------
-    # ========================================================= #
-    shiny::tabPanel(title = "Overdose Map",
-
     )
 
 
