@@ -40,3 +40,9 @@ check_na_io <- function(tbl, missing_only = TRUE) {
     print(missing_info)
   }
 }
+
+nothing_selected <- function(x) {
+  return(
+    length(is.na(x)) == 0
+  )
+}

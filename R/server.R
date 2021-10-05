@@ -21,4 +21,10 @@ server <- function(input, output, session) {
 
   naloxoneDistributionSeriesServer("kit_ts", kit_join_personal = kit_join_personal)
   naloxoneDemographicsServer("demo", kit_join_personal = kit_join_personal)
+
+  # data type: reactiveValues{data}
+  opioid_overdose_data_filtered <-
+    opioidOverdoseFiltersServer("overdose_filters")
+
+  #opioidOverdoseMapServer("opioid_overdose_map", opioid_overdose_data_filtered)
 }
