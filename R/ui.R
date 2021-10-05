@@ -25,7 +25,7 @@ ui <- function() {
                     ),
 
                     opioidOverdoseFiltersUI("overdose_filters"),
-                    opioidOverdoseMapUI("opioid_overdose_map")
+                    #opioidOverdoseMapUI("opioid_overdose_map")
 
     ),
 

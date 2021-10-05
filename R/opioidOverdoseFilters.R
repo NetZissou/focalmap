@@ -106,43 +106,47 @@ opioidOverdoseFiltersUI <- function(id) {
             )
           )
         ),
+
+        shiny::fluidRow(
+          shiny::column(
+            width = 12,
+            shiny::helpText("Make a subset of the opioid overdose data using the filters above. "),
+            shiny::helpText("When you finish tuning, click the apply button below to activate those filter criteria. "),
+            shiny::helpText("To reset all filters, click the reset button below and follow the apply button to receive all data available. "),
+            shiny::br()
+          )
+        ),
+
+        shiny::fluidRow(
+
+          shiny::column(
+            width = 2,
+            shiny::actionButton(shiny::NS(id, "apply_filters"), label = "Apply filters")
+          ),
+          shiny::column(
+            width = 2,
+            shiny::actionButton(shiny::NS(id, "reset_filters"), label = "Reset filters")
+          ),
+          shiny::column(
+            width = 2,
+            shiny::actionButton(shiny::NS(id, "collapse_filter_box"), label = "Hide filters")
+          ),
+          shiny::column(
+            width = 2,
+            shiny::downloadButton(shiny::NS(id, "download_filtered_data"), label = "Download data", icon = NULL)
+          )
+        )
       ),
 
       shiny::column(
         width = 6,
-        apexcharter::apexchartOutput(outputId = shiny::NS(id, "od_ts_monthly"), height = "200px")
-      )
-    ),
+        apexcharter::apexchartOutput(outputId = shiny::NS(id, "od_ts_monthly"), height = "180px"),
 
-    shiny::fluidRow(
-      shiny::column(
-        width = 12,
-        shiny::helpText("Make a subset of the opioid overdose data using the filters above. "),
-        shiny::helpText("When you finish tuning, click the apply button below to activate those filter criteria. "),
-        shiny::helpText("To reset all filters, click the reset button below and follow the apply button to receive all data available. "),
-        shiny::br()
-      )
-    ),
-
-    shiny::fluidRow(
-
-      shiny::column(
-        width = 1,
-        shiny::actionButton(shiny::NS(id, "apply_filters"), label = "Apply filters")
-      ),
-      shiny::column(
-        width = 1,
-        shiny::actionButton(shiny::NS(id, "reset_filters"), label = "Reset filters")
-      ),
-      shiny::column(
-        width = 1,
-        shiny::actionButton(shiny::NS(id, "collapse_filter_box"), label = "Hide filters")
-      ),
-      shiny::column(
-        width = 1,
-        shiny::downloadButton(shiny::NS(id, "download_filtered_data"), label = "Download data", icon = NULL)
+        opioidOverdoseMapUI(shiny::NS(id, "od_map"))
       )
     )
+
+
 
   )
 }
@@ -351,6 +355,8 @@ opioidOverdoseFiltersServer <- function(id) {
 
       return(spark)
     })
+
+    opioidOverdoseMapServer("od_map", filtered_overdose_data)
 
     return(
       filtered_overdose_data
