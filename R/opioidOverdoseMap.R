@@ -1,12 +1,16 @@
 opioidOverdoseMapUI <- function(id) {
 
-  shinydashboard::box(
-    width = 12, solidHeader = TRUE,
-    title = "Opioid Overdose Map",
-    leaflet::leafletOutput(
-      outputId = shiny::NS(id, "overdose_map"),
-      height = 700
-    )
+  # shinydashboard::box(
+  #   width = 12, solidHeader = TRUE,
+  #   title = "Opioid Overdose Map",
+  #   leaflet::leafletOutput(
+  #     outputId = shiny::NS(id, "overdose_map"),
+  #     height = 700
+  #   )
+  # )
+  leaflet::leafletOutput(
+    outputId = shiny::NS(id, "overdose_map"),
+    height = 600
   )
 }
 
