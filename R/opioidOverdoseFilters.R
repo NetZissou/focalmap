@@ -44,7 +44,7 @@ opioidOverdoseFiltersUI <- function(id) {
               label = "Date Range (Jan/1st/2008 - July/17th/2021)",
               min = "2008-01-01",
               max = "2021-07-17",
-              start = "2020-01-01",
+              start = "2008-01-01",
               end = "2021-07-17"
             )
           )
