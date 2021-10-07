@@ -21,7 +21,7 @@ get_ohio_school_district_sf <- function() {
 #' @export
 #'
 #' @examples
-#' get_ohio_school_district_sf()
+#' get_franklin_county_school_district_sf()
 get_franklin_county_school_district_sf <- function() {
 
   data <- load(opioidDashboard::FRANKLIN_COUNTY_SCHOOL_DISTRICT_SF_PATH)

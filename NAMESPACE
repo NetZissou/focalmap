@@ -2,6 +2,8 @@
 
 export("%>%")
 export(app)
+export(get_franklin_county_school_district_sf)
+export(get_ohio_school_district_sf)
 export(kit_data)
 export(naloxone_usage_data)
 export(opioid_overdose_data)

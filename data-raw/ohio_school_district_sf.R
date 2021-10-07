@@ -1,4 +1,4 @@
-SF_PATH <- "/fs/ess/PDE0001/school_district_sf/OhioSchoolDistricts_updated_all.geojson"
+SF_PATH <- "/fs/ess/PDE0001/geographies/school_district_sf/OhioSchoolDistricts_updated_all.geojson"
 GLOBAL_CRS_CODE <- 4326
 
 ohio_school_district_sf <-
@@ -42,8 +42,8 @@ franklin_county_school_district_sf <-
   )
 
 # Store school district shapefiles type
-OHIO_SCHOOL_DISTRICT_SF_PATH <- "/fs/ess/PDE0001/school_district_sf/ohio_school_district_sf.rda"
-FRANKLIN_COUNTY_SCHOOL_DISTRICT_SF_PATH <- "/fs/ess/PDE0001/school_district_sf/franklin_county_school_district_sf.rda"
+OHIO_SCHOOL_DISTRICT_SF_PATH <- "/fs/ess/PDE0001/geographies/school_district_sf/ohio_school_district_sf.rda"
+FRANKLIN_COUNTY_SCHOOL_DISTRICT_SF_PATH <- "/fs/ess/PDE0001/geographies/school_district_sf/franklin_county_school_district_sf.rda"
 
 # Save shapefiles to OSC server
 save(ohio_school_district_sf, file = OHIO_SCHOOL_DISTRICT_SF_PATH)
