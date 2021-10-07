@@ -46,3 +46,18 @@ nothing_selected <- function(x) {
     length(is.na(x)) == 0
   )
 }
+
+#' Load Map Shapefile Function
+#' @param file sf file path
+#' @param crs crs code default to be 4326
+load_map_shapefile <- function(file, crs = 4326) {
+
+  if (crs != 4326) {
+    stop("'crs' must be 4326 at this moment.")
+  }
+
+  map_data <- sf::read_sf(file, quiet = TRUE)
+  map_data <- sf::st_transform(map_data, crs = 4326)
+
+  return(map_data)
+}
