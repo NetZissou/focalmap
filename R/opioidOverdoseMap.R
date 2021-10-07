@@ -48,7 +48,7 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data) {
         leaflet::addCircleMarkers(
           lng = ~lng, lat = ~lat,
           stroke = FALSE,
-          fillColor = "darkred",
+          fillColor = "#de2d26",
           fillOpacity = 0.3
         )
     })
