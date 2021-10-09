@@ -2,11 +2,28 @@ Package: opioidDashboard
 Title: The shiny application for opioid research and data exploration
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Net",
-           family = "Zhang",
-           role = c("aut", "cre"),
-           email = "zhang.11091@osu.edu",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    c(
+        person(
+            given = "Net", family = "Zhang",
+            role = c("aut", "cre"),
+            email = "zhang.11091@osu.edu"
+        ),
+        person(
+            given = "Ayaz", family = "Hyder",
+            role = c("aut", "cph"),
+            email = "hyder.22@osu.edu"
+        ),
+        person(
+            given = "Adam", family = "Porr",
+            role = c("ctb"),
+            email = "porr.4@osu.edu"
+        ),
+        person(
+            given = "Anne", family = "Trinh",
+            role = c("ctb"),
+            email = "trinh.89@osu.edu"
+        )
+    )
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
