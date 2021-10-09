@@ -2,6 +2,7 @@
 
 export("%>%")
 export(app)
+export(drug_crime_data)
 export(get_census_tract_sf)
 export(get_fire_district_sf)
 export(get_franklin_county_school_district_sf)
