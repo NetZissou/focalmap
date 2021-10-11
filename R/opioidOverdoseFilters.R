@@ -299,24 +299,57 @@ opioidOverdoseFiltersServer <- function(id) {
       color <- "#2E93fA"
       background <- "#FFF"
 
-      spark <-
-        filtered_overdose_data$data %>%
+      od_data <- filtered_overdose_data$data
+
+      daily_data <-
+        od_data %>%
+        dplyr::mutate(
+          date = lubridate::as_date(lubridate::ymd_hms(.data$date))
+        ) %>%
+        dplyr::group_by(.data$date) %>%
+        dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+        dplyr::arrange(.data$date) %>%
+        dplyr::mutate(
+          type = "Daily Case Count"
+        )
+
+      monthly_data <-
+        od_data %>%
         dplyr::mutate(
           yearmonth = paste0(lubridate::year(.data$date), "/", lubridate::month(.data$date))
         ) %>%
         dplyr::group_by(.data$yearmonth) %>%
-        dplyr::summarise(`Monthly Case Count` = dplyr::n(), .groups = "drop") %>%
-        dplyr::mutate(
-          date = lubridate::ym(.data$yearmonth)
+        dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+        dplyr::transmute(
+          date = lubridate::ym(.data$yearmonth),
+          n = .data$n/30
         ) %>%
         dplyr::arrange(.data$date) %>%
-        apexcharter::apex(type = "area",
+        dplyr::mutate(
+          type = "Monthly moving average"
+        )
+
+      plot_data <-
+        daily_data %>%
+        dplyr::bind_rows(
+          monthly_data
+        ) %>%
+        purrr::set_names(
+          c("date", "Case count", "type")
+        )
+
+
+
+      spark <-
+        plot_data %>%
+        apexcharter::apex(type = "area-spline",
                           apexcharter::aes(x = .data$date,
-                                           y = .data[["Monthly Case Count"]]),
+                                           y = .data[["Case count"]],
+                                           group = .data$type),
                           auto_update = FALSE) %>%
-        apexcharter::ax_colors("darkred") %>%
+        apexcharter::ax_colors(c("#fee0d2", "#de2d26")) %>%
         apexcharter::ax_title(
-          text = "Opioid Overdose Monthly Count",
+          text = "Opioid Overdose Case Time Series",
           align = "left",
           style = list(fontSize = "22px", fontWeight = 700)
         ) %>%
@@ -327,7 +360,7 @@ opioidOverdoseFiltersServer <- function(id) {
         apexcharter::ax_yaxis(
           decimalsInFloat = 0,
           labels = list(
-            formatter = apexcharter::format_num(".2s")
+            formatter = apexcharter::format_num(".2")
           )
         ) %>%
         apexcharter::ax_yaxis(
