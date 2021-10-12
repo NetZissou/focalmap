@@ -254,6 +254,7 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data) {
     shiny::observe({
 
       leaflet::leafletProxy("overdose_map", data = filtered_data()) %>%
+        leaflet::clearMarkerClusters() %>%
         leaflet::clearMarkers() %>%
         leaflet::addCircleMarkers(
           lng = ~lng, lat = ~lat,
