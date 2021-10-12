@@ -8,9 +8,12 @@ opioidOverdoseMapUI <- function(id) {
   #     height = 700
   #   )
   # )
-  leaflet::leafletOutput(
-    outputId = shiny::NS(id, "overdose_map"),
-    height = 600
+  shinyWidgets::addSpinner(
+    leaflet::leafletOutput(
+      outputId = shiny::NS(id, "overdose_map"),
+      height = 600
+    ),
+    spin = "fading-circle"
   )
 }
 
@@ -230,7 +233,8 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data) {
           lng = ~lng, lat = ~lat,
           stroke = FALSE,
           fillColor = "#de2d26",
-          fillOpacity = 0.3
+          fillOpacity = 0.3,
+          clusterOptions = leaflet::markerClusterOptions(removeOutsideVisibleBounds = F)
         )
     })
   })

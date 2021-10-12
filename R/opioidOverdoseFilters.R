@@ -140,7 +140,10 @@ opioidOverdoseFiltersUI <- function(id) {
 
       shiny::column(
         width = 6,
-        apexcharter::apexchartOutput(outputId = shiny::NS(id, "od_ts_monthly"), height = "180px"),
+        shinyWidgets::addSpinner(
+          apexcharter::apexchartOutput(outputId = shiny::NS(id, "od_ts_monthly"), height = "180px"),
+          spin = "fading-circle"
+        ),
 
         opioidOverdoseMapUI(shiny::NS(id, "od_map"))
       )
