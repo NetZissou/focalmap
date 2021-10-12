@@ -8,9 +8,22 @@ opioidOverdoseMapUI <- function(id) {
   #     height = 700
   #   )
   # )
-  leaflet::leafletOutput(
-    outputId = shiny::NS(id, "overdose_map"),
-    height = 600
+  shiny::tagList(
+
+    # shinyWidgets::actionBttn(
+    #   inputId = shiny::NS(id, "screenshot_overdose_map"),
+    #   label = "Take a map screenshot",
+    #   style = "minimal",
+    #   color = "success"
+    # ),
+
+    shinyWidgets::addSpinner(
+      leaflet::leafletOutput(
+        outputId = shiny::NS(id, "overdose_map"),
+        height = 600
+      ),
+      spin = "fading-circle"
+    )
   )
 }
 
@@ -40,6 +53,15 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data) {
     # ============================================================ #
     # --------------------- Overdose Map -------------------------
     # ============================================================ #
+
+    # shiny::observeEvent(input$screenshot_overdose_map, {
+    #
+    #   # shinyscreenshot::screenshot(
+    #   #   filename = "overdose_map_screenshot",
+    #   #   id = "overdose_map",
+    #   #   scale = 1,
+    #   # )
+    # })
 
     output$overdose_map <- leaflet::renderLeaflet({
       # Use leaflet() here, and only include aspects of the map that
@@ -219,7 +241,14 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data) {
             "Census Tract",
             "Zip Code"
           )
-        )
+        ) %>%
+        # --- Full Screen Control --- #
+        leaflet.extras::addFullscreenControl(
+          position = "topleft",
+          pseudoFullscreen = FALSE
+        ) %>%
+        leaflet.extras::addResetMapButton() # reset
+
     })
 
     shiny::observe({
@@ -230,7 +259,8 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data) {
           lng = ~lng, lat = ~lat,
           stroke = FALSE,
           fillColor = "#de2d26",
-          fillOpacity = 0.3
+          fillOpacity = 0.3,
+          clusterOptions = leaflet::markerClusterOptions(removeOutsideVisibleBounds = F)
         )
     })
   })

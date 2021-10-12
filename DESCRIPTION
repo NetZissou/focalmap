@@ -41,6 +41,7 @@ Imports:
     htmlwidgets,
     janitor,
     leaflet,
+    leaflet.extras,
     lubridate,
     magrittr,
     purrr,
@@ -54,6 +55,7 @@ Imports:
     shinydashboardPlus,
     shinyjs,
     shinyWidgets,
+    snapper (>= 0.0.4),
     stringr,
     tibble,
     tidyr,
@@ -61,3 +63,5 @@ Imports:
     tsibble
 Depends: 
     R (>= 2.10)
+Remotes:  
+    yonicd/snapper
