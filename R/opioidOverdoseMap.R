@@ -10,12 +10,12 @@ opioidOverdoseMapUI <- function(id) {
   # )
   shiny::tagList(
 
-    shinyWidgets::actionBttn(
-      inputId = shiny::NS(id, "screenshot_overdose_map"),
-      label = "Take a map screenshot",
-      style = "minimal",
-      color = "success"
-    ),
+    # shinyWidgets::actionBttn(
+    #   inputId = shiny::NS(id, "screenshot_overdose_map"),
+    #   label = "Take a map screenshot",
+    #   style = "minimal",
+    #   color = "success"
+    # ),
 
     shinyWidgets::addSpinner(
       leaflet::leafletOutput(
@@ -54,14 +54,14 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data) {
     # --------------------- Overdose Map -------------------------
     # ============================================================ #
 
-    shiny::observeEvent(input$screenshot_overdose_map, {
-
-      shinyscreenshot::screenshot(
-        filename = "overdose_map_screenshot",
-        id = "overdose_map",
-        scale = 1,
-      )
-    })
+    # shiny::observeEvent(input$screenshot_overdose_map, {
+    #
+    #   # shinyscreenshot::screenshot(
+    #   #   filename = "overdose_map_screenshot",
+    #   #   id = "overdose_map",
+    #   #   scale = 1,
+    #   # )
+    # })
 
     output$overdose_map <- leaflet::renderLeaflet({
       # Use leaflet() here, and only include aspects of the map that
