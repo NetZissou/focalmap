@@ -24,7 +24,7 @@ opioidOverdoseFiltersUI <- function(id) {
             width = 3,
             shiny::selectizeInput(
               inputId = shiny::NS(id, "ethnicity"),
-              label = "Ethnicity",
+              label = "Race",
               multiple = TRUE,
               choices = c("", "White", "Black or African American", "Asian",
                           "Other"),
@@ -130,10 +130,27 @@ opioidOverdoseFiltersUI <- function(id) {
           shiny::column(
             width = 2,
             shiny::actionButton(shiny::NS(id, "collapse_filter_box"), label = "Hide filters")
+          )
+        ),
+
+        shiny::tags$br(),
+
+        shiny::fluidRow(
+          shiny::column(
+            width = 3,
+            shiny::downloadButton(shiny::NS(id, "download_filtered_data"), label = "Download filtered data", icon = NULL)
           ),
           shiny::column(
-            width = 2,
-            shiny::downloadButton(shiny::NS(id, "download_filtered_data"), label = "Download data", icon = NULL)
+            width = 3,
+            snapper::download_button(
+              ui = paste0("#", shiny::NS(shiny::NS(id, "od_map"), "overdose_map")),
+              label = "Capture map screenshot",
+              filename = "opioid_overdose_map.png",
+              opts = snapper::config(
+                allowTaint = TRUE,
+                useCORS = TRUE
+              )
+            )
           )
         )
       ),
@@ -196,6 +213,15 @@ opioidOverdoseFiltersServer <- function(id) {
           selected = ""
         )
       }
+
+      # clear temporal
+      shiny::updateDateRangeInput(
+        inputId = "date_range",
+        min = "2008-01-01",
+        max = "2021-07-17",
+        start = "2008-01-01",
+        end = "2021-07-17"
+      )
 
     })
 
@@ -376,13 +402,13 @@ opioidOverdoseFiltersServer <- function(id) {
       )
       spark$sizingPolicy <- htmlwidgets::sizingPolicy(
         defaultWidth = "100%",
-        defaultHeight = "160px",
-        viewer.defaultHeight = "160px",
+        defaultHeight = "180px",
+        viewer.defaultHeight = "180px",
         viewer.defaultWidth = "100%",
         viewer.fill = FALSE,
         knitr.figure = FALSE,
         knitr.defaultWidth = "100%",
-        knitr.defaultHeight = "160px",
+        knitr.defaultHeight = "180px",
         browser.fill = FALSE,
         viewer.suppress = FALSE,
         browser.external = TRUE,
