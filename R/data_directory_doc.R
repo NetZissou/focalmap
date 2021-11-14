@@ -8,3 +8,6 @@
 
 #' Drug crime data directory
 "DRUG_CRIME_DATA_DIRECTORY"
+
+#' Treatment providers data directory
+"TREATMENT_PROVIDERS_DATA_DIRECTORY"

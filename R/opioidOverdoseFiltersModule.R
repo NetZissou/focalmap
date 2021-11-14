@@ -190,6 +190,12 @@ opioidOverdoseFiltersServer <- function(id) {
       data = drug_crime_data_all
     )
 
+    # Source data: treatment providers
+    treatment_providers_data_all <- opioidDashboard::treatment_providers_data(tier_2_only = TRUE)
+    filtered_treatment_providers_data <- shiny::reactiveValues(
+      data = treatment_providers_data_all
+    )
+
     # ================================ #
     # ---- Action Button Controls ----
     # ================================ #
@@ -336,7 +342,6 @@ opioidOverdoseFiltersServer <- function(id) {
           )
       }
 
-      print(filtered_drug_crime_data$data)
 
       shinyalert::shinyalert(
         title = "Success",
@@ -517,7 +522,12 @@ opioidOverdoseFiltersServer <- function(id) {
     # ====================== #
     # ---- Overdose Map ----
     # ====================== #
-    opioidOverdoseMapServer("od_map", filtered_overdose_data, filtered_drug_crime_data)
+    opioidOverdoseMapServer(
+      "od_map",
+      filtered_overdose_data,
+      filtered_drug_crime_data,
+      filtered_treatment_providers_data
+    )
 
     return(
       filtered_overdose_data
