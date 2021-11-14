@@ -4,10 +4,15 @@
 \alias{drug_crime_data}
 \title{Loading function for drug crime data}
 \usage{
-drug_crime_data(dir = opioidDashboard::DRUG_CRIME_DATA_DIRECTORY)
+drug_crime_data(
+  dir = opioidDashboard::DRUG_CRIME_DATA_DIRECTORY,
+  geocode = TRUE
+)
 }
 \arguments{
 \item{dir}{directory on OSC that contains drug crime data}
+
+\item{geocode}{TRUE will return data with lat/lng geocoding information}
 }
 \value{
 drug crime data
