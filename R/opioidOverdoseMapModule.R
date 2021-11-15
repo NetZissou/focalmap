@@ -27,9 +27,14 @@ opioidOverdoseMapUI <- function(id) {
   )
 }
 
-opioidOverdoseMapServer <- function(id, filtered_overdose_data, filtered_drug_crime_data) {
+opioidOverdoseMapServer <- function(
+  id, filtered_overdose_data,
+  filtered_drug_crime_data, filtered_treatment_providers_data
+) {
   shiny::req(shiny::is.reactivevalues(filtered_overdose_data))
   shiny::req(shiny::is.reactivevalues(filtered_drug_crime_data))
+  shiny::req(shiny::is.reactivevalues(filtered_treatment_providers_data))
+
   shiny::moduleServer(id, function(input, output, session){
 
     overdose_data <-
@@ -43,6 +48,12 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data, filtered_drug_cr
       shiny::reactive({
         return(
           filtered_drug_crime_data$data
+        )
+      })
+    treatment_providers_data <-
+      shiny::reactive({
+        return(
+          filtered_treatment_providers_data$data
         )
       })
 
@@ -71,187 +82,189 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data, filtered_drug_cr
       leaflet::leaflet() %>%
         # =================== #
         # ---- Map Tiles ----
-        # =================== #
-        leaflet::addTiles() %>%
+      # =================== #
+      leaflet::addTiles() %>%
         leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) %>%
         # ========================= #
         # ---- Map init Bounds ----
-        # ========================= #
-        leaflet::fitBounds(
-          lng1 = opioid_overdose_map_init_bounds$min_lng,
-          lat1 = opioid_overdose_map_init_bounds$min_lat,
-          lng2 = opioid_overdose_map_init_bounds$max_lng,
-          lat2 = opioid_overdose_map_init_bounds$max_lat
-        ) %>%
+      # ========================= #
+      leaflet::fitBounds(
+        lng1 = opioid_overdose_map_init_bounds$min_lng,
+        lat1 = opioid_overdose_map_init_bounds$min_lat,
+        lng2 = opioid_overdose_map_init_bounds$max_lng,
+        lat2 = opioid_overdose_map_init_bounds$max_lat
+      ) %>%
         leaflet::addMapPane("County_districts_polyline", zIndex = 420) %>%
         # ================================================ #
         # ---- Shapefile outline: FC School Districts ----
-        # ================================================ #
-        leaflet::addPolygons(
-          data = franklin_county_school_district_sf,
-          group = "FC School Districts",
-          stroke = TRUE,
-          color = "#555555",
-          weight = 1,
-          opacity = 0.8,
-          dashArray = "3",
-          fillOpacity = 0.1,
-          options = leaflet::pathOptions(pane = "County_districts_polyline"),
+      # ================================================ #
+      leaflet::addPolygons(
+        data = franklin_county_school_district_sf,
+        group = "FC School Districts",
+        stroke = TRUE,
+        color = "#555555",
+        weight = 1,
+        opacity = 0.8,
+        dashArray = "3",
+        fillOpacity = 0.1,
+        options = leaflet::pathOptions(pane = "County_districts_polyline"),
 
-          label = ~ paste0(
-            "<b>", NAME, "</b>"
-          ) %>% lapply(htmltools::HTML),
+        label = ~ paste0(
+          "<b>", NAME, "</b>"
+        ) %>% lapply(htmltools::HTML),
 
-          labelOptions = leaflet::labelOptions(
-            style = list(
-              "font-weight" = "normal",
-              padding = "3px 8px"
-            ),
-            textsize = "15px",
-            direction = "auto"
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
           ),
+          textsize = "15px",
+          direction = "auto"
+        ),
 
-          highlight = leaflet::highlightOptions(
-            weight = 3,
-            fillOpacity = 0.1,
-            color = "black",
-            dashArray = "",
-            opacity = 0.5,
-            bringToFront = TRUE,
-            sendToBack = TRUE
-          )
-        ) %>%
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
         # =========================================== #
         # ---- Shapefile outline: Fire Districts ----
-        # =========================================== #
-        leaflet::addPolygons(
-          data = fire_districts_sf,
-          group = "Fire Districts",
-          stroke = TRUE,
-          color = "#555555",
-          weight = 1,
-          opacity = 0.8,
-          dashArray = "3",
-          fillOpacity = 0.1,
-          options = leaflet::pathOptions(pane = "County_districts_polyline"),
+      # =========================================== #
+      leaflet::addPolygons(
+        data = fire_districts_sf,
+        group = "Fire Districts",
+        stroke = TRUE,
+        color = "#555555",
+        weight = 1,
+        opacity = 0.8,
+        dashArray = "3",
+        fillOpacity = 0.1,
+        options = leaflet::pathOptions(pane = "County_districts_polyline"),
 
-          label = ~ paste0(
-            "<b>", DEPARTMENT, "</b>"
-          ) %>% lapply(htmltools::HTML),
+        label = ~ paste0(
+          "<b>", DEPARTMENT, "</b>"
+        ) %>% lapply(htmltools::HTML),
 
-          labelOptions = leaflet::labelOptions(
-            style = list(
-              "font-weight" = "normal",
-              padding = "3px 8px"
-            ),
-            textsize = "15px",
-            direction = "auto"
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
           ),
+          textsize = "15px",
+          direction = "auto"
+        ),
 
-          highlight = leaflet::highlightOptions(
-            weight = 3,
-            fillOpacity = 0.1,
-            color = "black",
-            dashArray = "",
-            opacity = 0.5,
-            bringToFront = TRUE,
-            sendToBack = TRUE
-          )
-        ) %>%
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
         # ========================================= #
         # ---- Shapefile outline: Census Tract ----
-        # ========================================= #
-        leaflet::addPolygons(
-          data = census_tract_sf,
-          group = "Census Tract",
-          stroke = TRUE,
-          color = "#555555",
-          weight = 1,
-          opacity = 0.8,
-          dashArray = "3",
-          fillOpacity = 0.1,
-          options = leaflet::pathOptions(pane = "County_districts_polyline"),
+      # ========================================= #
+      leaflet::addPolygons(
+        data = census_tract_sf,
+        group = "Census Tract",
+        stroke = TRUE,
+        color = "#555555",
+        weight = 1,
+        opacity = 0.8,
+        dashArray = "3",
+        fillOpacity = 0.1,
+        options = leaflet::pathOptions(pane = "County_districts_polyline"),
 
-          label = ~ paste0(
-            "<b>", GEOID, "</b>"
-          ) %>% lapply(htmltools::HTML),
+        label = ~ paste0(
+          "<b>", GEOID, "</b>"
+        ) %>% lapply(htmltools::HTML),
 
-          labelOptions = leaflet::labelOptions(
-            style = list(
-              "font-weight" = "normal",
-              padding = "3px 8px"
-            ),
-            textsize = "15px",
-            direction = "auto"
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
           ),
+          textsize = "15px",
+          direction = "auto"
+        ),
 
-          highlight = leaflet::highlightOptions(
-            weight = 3,
-            fillOpacity = 0.1,
-            color = "black",
-            dashArray = "",
-            opacity = 0.5,
-            bringToFront = TRUE,
-            sendToBack = TRUE
-          )
-        ) %>%
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
         # ===================================== #
         # ---- Shapefile outline: Zip Code ----
-        # ===================================== #
-        leaflet::addPolygons(
-          data = zipcode_sf,
-          group = "Zip Code",
-          stroke = TRUE,
-          color = "#555555",
-          weight = 1,
-          opacity = 0.8,
-          dashArray = "3",
-          fillOpacity = 0.1,
-          options = leaflet::pathOptions(pane = "County_districts_polyline"),
+      # ===================================== #
+      leaflet::addPolygons(
+        data = zipcode_sf,
+        group = "Zip Code",
+        stroke = TRUE,
+        color = "#555555",
+        weight = 1,
+        opacity = 0.8,
+        dashArray = "3",
+        fillOpacity = 0.1,
+        options = leaflet::pathOptions(pane = "County_districts_polyline"),
 
-          label = ~ paste0(
-            "<b>", GEOID, "</b>"
-          ) %>% lapply(htmltools::HTML),
+        label = ~ paste0(
+          "<b>", GEOID, "</b>"
+        ) %>% lapply(htmltools::HTML),
 
-          labelOptions = leaflet::labelOptions(
-            style = list(
-              "font-weight" = "normal",
-              padding = "3px 8px"
-            ),
-            textsize = "15px",
-            direction = "auto"
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
           ),
+          textsize = "15px",
+          direction = "auto"
+        ),
 
-          highlight = leaflet::highlightOptions(
-            weight = 3,
-            fillOpacity = 0.1,
-            color = "black",
-            dashArray = "",
-            opacity = 0.5,
-            bringToFront = TRUE,
-            sendToBack = TRUE
-          )
-        ) %>%
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
 
         # ======================== #
         # ---- Layers Control ----
-        # ======================== #
-        leaflet::addLayersControl(
-          position = "topright",
-          baseGroups = c(
-            "Opioid Overdose Cases",
-            "Drug Crime Cases"
-          ),
-          overlayGroups = c(
-            "FC School Districts",
-            "Fire Districts",
-            "Census Tract",
-            "Zip Code"
-          ),
-          options = leaflet::layersControlOptions(collapsed = FALSE)
-        ) %>%
+      # ======================== #
+      leaflet::addLayersControl(
+        position = "topright",
+        baseGroups = c(
+          "Opioid Overdose Cases",
+          "Drug Crime Cases"
+        ),
+        overlayGroups = c(
+          "Treatment Providers",
+          "FC School Districts",
+          "Fire Districts",
+          "Census Tract",
+          "Zip Code"
+        ),
+        options = leaflet::layersControlOptions(collapsed = FALSE)
+      ) %>%
         leaflet::hideGroup(
           c(
+            "Treatment Providers",
             "FC School Districts",
             "Fire Districts",
             "Census Tract",
@@ -267,11 +280,13 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data, filtered_drug_cr
 
     })
 
-    shiny::observe({
+    # ============================================= #
+    # ---- Update: Overdose markers & clusters ----
+    # ============================================= #
 
+    shiny::observe({
       leaflet::leafletProxy("overdose_map") %>%
-        leaflet::clearMarkerClusters() %>%
-        leaflet::clearMarkers() %>%
+        leaflet::clearGroup(group = "Opioid Overdose Cases") %>%
         leaflet::addCircleMarkers(
           data = overdose_data(),
           lng = ~lng, lat = ~lat,
@@ -280,8 +295,17 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data, filtered_drug_cr
           fillOpacity = 0.3,
           clusterOptions = leaflet::markerClusterOptions(removeOutsideVisibleBounds = F),
           group = "Opioid Overdose Cases"
-        ) %>%
-        leaflet:::addCircleMarkers(
+        )
+    })
+
+    # ==================================================== #
+    # ---- Update: Drug crime data markers & clusters ----
+    # ==================================================== #
+
+    shiny::observe({
+      leaflet::leafletProxy("overdose_map") %>%
+        leaflet::clearGroup(group = "Drug Crime Cases") %>%
+        leaflet::addCircleMarkers(
           data = drug_crime_data(),
           lng = ~lng, lat = ~lat,
           stroke = FALSE,
@@ -291,6 +315,54 @@ opioidOverdoseMapServer <- function(id, filtered_overdose_data, filtered_drug_cr
           group = "Drug Crime Cases"
         )
     })
+
+    # ================================================== #
+    # ---- Update: Treatment data providers markers ----
+    # ================================================== #
+    shiny::observe({
+      leaflet::leafletProxy("overdose_map") %>%
+        leaflet::clearGroup(group = "Treatment Providers") %>%
+        leaflet::addMarkers(
+          data = treatment_providers_data(),
+          lng = ~lng, lat = ~lat,
+          popup = ~popup,
+          #label = ~label,
+          group = "Treatment Providers",
+          labelOptions = leaflet::labelOptions(
+            style = list(
+              "font-size" = "15px",
+              "font-style" = "bold",
+              "border-color" = "rgba(0,0,0,0.5)"
+            )
+          )
+        )
+    })
+
+
+    # shiny::observe({
+    #
+    #   leaflet::leafletProxy("overdose_map") %>%
+    #     leaflet::clearMarkerClusters() %>%
+    #     leaflet::clearMarkers() %>%
+    #     leaflet::addCircleMarkers(
+    #       data = overdose_data(),
+    #       lng = ~lng, lat = ~lat,
+    #       stroke = FALSE,
+    #       fillColor = "#de2d26",
+    #       fillOpacity = 0.3,
+    #       clusterOptions = leaflet::markerClusterOptions(removeOutsideVisibleBounds = F),
+    #       group = "Opioid Overdose Cases"
+    #     ) %>%
+    #     leaflet:::addCircleMarkers(
+    #       data = drug_crime_data(),
+    #       lng = ~lng, lat = ~lat,
+    #       stroke = FALSE,
+    #       fillColor = "#756bb1",
+    #       fillOpacity = 0.3,
+    #       clusterOptions = leaflet::markerClusterOptions(removeOutsideVisibleBounds = F),
+    #       group = "Drug Crime Cases"
+    #     )
+    # })
   })
 }
 
