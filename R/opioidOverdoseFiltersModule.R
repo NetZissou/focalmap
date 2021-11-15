@@ -107,6 +107,8 @@ opioidOverdoseFiltersUI <- function(id) {
           )
         ),
 
+        shiny::h4("Treatment Providers"),
+
         shiny::fluidRow(
           shiny::column(
             width = 12,

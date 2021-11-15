@@ -37,7 +37,7 @@ ui <- function() {
       # ========================================================= #
       # ------------ Tab: Naloxone Intake Forms -----------------
       # ========================================================= #
-      shiny::tabPanel(title = "Naloxone Intake Forms",
+      shiny::tabPanel(title = " Integrated Time Series Analysis ",
                       shiny::fluidRow(
                         naloxoneDistributionSeriesUI("kit_ts")
                       ),
