@@ -27,6 +27,11 @@ treatment_providers_data <- function(
       dplyr::everything(),
       lat = .data$latitude,
       lng = .data$longitude
+    ) %>%
+    dplyr::mutate(
+      gender_all = (.data$gender == "all"),
+      gender_female = (.data$gender == "female"),
+      gender_male = (.data$gender == "male")
     )
 
   # ================================== #

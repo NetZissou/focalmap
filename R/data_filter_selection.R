@@ -9,3 +9,6 @@
 
 #' Filter selection for location type
 "filter_selection_location_type"
+
+#' Filter selection for trearment providers specification
+"filter_selection_treatment_providers_spec"

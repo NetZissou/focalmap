@@ -108,6 +108,26 @@ opioidOverdoseFiltersUI <- function(id) {
         ),
 
         shiny::h4("Treatment Providers"),
+        shiny::fluidRow(
+          shiny::column(
+            width = 12,
+            shiny::selectizeInput(
+              inputId = shiny::NS(id, "treatment_providers_service"),
+              label = "Service Type",
+              multiple = TRUE,
+              selected = "",
+              choices = NULL
+            ),
+
+            shiny::selectizeInput(
+              inputId = shiny::NS(id, "treatment_providers_spec"),
+              label = "Specifications",
+              multiple = TRUE,
+              selected = "",
+              choices = opioidDashboard::filter_selection_treatment_providers_spec
+            )
+          )
+        ),
 
         shiny::fluidRow(
           shiny::column(
@@ -266,6 +286,7 @@ opioidOverdoseFiltersServer <- function(id) {
       # we are not shrinking the data everytime the users update the filters
       filtered_overdose_data$data <- opioid_overdose_data_all
       filtered_drug_crime_data$data <- drug_crime_data_all
+      filtered_treatment_providers_data$data <- treatment_providers_data_all
 
       # Filters: Gender ====
       if (!nothing_selected(input$gender)) {
@@ -342,6 +363,31 @@ opioidOverdoseFiltersServer <- function(id) {
           dplyr::filter(
             .data$destination %in% input$destination
           )
+      }
+
+      # Filters: Treatment Providers Specification ====
+      if (!nothing_selected(input$treatment_providers_spec)) {
+
+        filtered_providers_id <-
+          filtered_treatment_providers_data$data  %>%
+          tidyr::pivot_longer(
+            cols = opioidDashboard::filter_selection_treatment_providers_spec,
+            names_to = "spec",
+            values_to = "status"
+          ) %>%
+          dplyr::filter(
+            .data$spec %in% input$treatment_providers_spec,
+            .data$status == TRUE
+          ) %>%
+          dplyr::distinct(.data$id) %>%
+          dplyr::pull(.data$id)
+
+        filtered_treatment_providers_data$data <-
+          filtered_treatment_providers_data$data %>%
+          dplyr::filter(
+            .data$id %in% filtered_providers_id
+          )
+        print(filtered_treatment_providers_data$data)
       }
 
 
