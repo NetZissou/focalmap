@@ -1,3 +1,8 @@
 # opioidDashboard 0.1.0
 
-* Added a `NEWS.md` file to track changes to the package.
+* Opioid overdose cases time series quick visualization
+* Opioid overdose cases spatial analysis
+* Drug crime cases spatial analysis
+* regional polygons
+* High-level filters based on demographic, time range, spatial, etc.
+* Treatment providers service info display
