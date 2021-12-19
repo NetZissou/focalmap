@@ -5,3 +5,9 @@
 
 #' Contains the data directory of opioid overdose data
 "OPIOID_OVERDOSE_DATA_DIRECTORY"
+
+#' Drug crime data directory
+"DRUG_CRIME_DATA_DIRECTORY"
+
+#' Treatment providers data directory
+"TREATMENT_PROVIDERS_DATA_DIRECTORY"
