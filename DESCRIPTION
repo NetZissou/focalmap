@@ -1,6 +1,6 @@
 Package: opioidDashboard
 Title: The shiny application for opioid research and data exploration
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     c(
         person(
@@ -63,5 +63,5 @@ Imports:
     tsibble
 Depends: 
     R (>= 2.10)
-Remotes:  
+Remotes: 
     yonicd/snapper
