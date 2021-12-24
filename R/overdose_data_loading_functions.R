@@ -6,7 +6,7 @@
 #' @export
 #'
 #' @examples
-#' project_dawn_focused_indicators()
+#' opioid_overdose_data()
 opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIRECTORY) {
   data_name <- "primary_table.csv"
   data_path <- paste0(dir, "/", data_name)
@@ -58,6 +58,10 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
     dplyr::rename(
       lat = .data$latitude,
       lng = .data$longitude
+    ) %>%
+    # remove one outlier from 1900-01-01
+    dplyr::filter(
+      .data$date != lubridate::ymd(19000101)
     )
   return(
     data
