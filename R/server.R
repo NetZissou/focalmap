@@ -26,5 +26,6 @@ server <- function(input, output, session) {
   opioid_overdose_data_filtered <-
     opioidOverdoseFiltersServer("overdose_filters")
 
+  hotSpotDetectionServer("hot_spot", filtered_overdose_data = opioid_overdose_data_filtered)
   #opioidOverdoseMapServer("opioid_overdose_map", opioid_overdose_data_filtered)
 }

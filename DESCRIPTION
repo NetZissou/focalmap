@@ -45,6 +45,7 @@ Imports:
     lubridate,
     magrittr,
     purrr,
+    reactable,
     readr,
     rlang,
     scales,

@@ -10,7 +10,6 @@ ui <- function() {
     shinyjs::useShinyjs(),
     shinyWidgets::useShinydashboard(),
     shinyWidgets::useShinydashboardPlus(),
-    shinyalert::useShinyalert(),
 
     theme = bslib::bs_theme(bootswatch = "materia", font_scale = 1.1),
     shiny::navbarPage(
@@ -37,14 +36,18 @@ ui <- function() {
       # ========================================================= #
       # ------------ Tab: Naloxone Intake Forms -----------------
       # ========================================================= #
-      shiny::tabPanel(title = " Integrated Time Series Analysis ",
+      shiny::tabPanel(title = "Integrated Time Series Analysis ",
                       shiny::fluidRow(
                         naloxoneDistributionSeriesUI("kit_ts")
                       ),
                       shiny::fluidRow(
                         naloxoneDemographicsUI("demo")
                       )
-      )
+      ),
+
+      shiny::tabPanel(title = "Hot Spot Detection",
+                      hotSpotDetectionUI("hot_spot")
+                      )
 
 
     )
