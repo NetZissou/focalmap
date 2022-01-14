@@ -108,7 +108,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
       shiny::is.reactivevalues(filtered_overdose_data)
     )
 
-    hyper_params <- reactiveValues(
+    hyper_params <- shiny::reactiveValues(
       data_source = opioidDashboard::opioid_overdose_data(),
       bin_width = 0.01,
       quantile = 0.75
@@ -159,7 +159,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
           lat = readr::parse_number(.data$X47),
           lng = .data$X48
         ) %>%
-        na.omit()
+        stats::na.omit()
     )
 
     eligible_business_type <-
@@ -190,12 +190,12 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
 
       zip_code_map +
         ggplot2::geom_bin_2d(
-          ggplot2::aes(x = lng, y = lat),
+          ggplot2::aes(x = .data$lng, y = .data$lat),
           binwidth = c(bin_width, bin_width),
           data = data_source
         ) +
         ggplot2::geom_text(
-          ggplot2::aes(x = lng, y = lat, label = hot_spot),
+          ggplot2::aes(x = .data$lng, y = .data$lat, label = .data$hot_spot),
           data =  opioidDashboard::get_hot_spot_region(
             od_data = data_source,
             percent_tile = quantile,
@@ -247,10 +247,15 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
             eligible_business_type = eligible_business_type
           )
         ) %>%
-        dplyr::select(business) %>%
+        dplyr::select(.data$business) %>%
         tidyr::unnest(cols = "business") %>%
         dplyr::select(
-          hot_spot, dplyr::everything()
+          `Hot Spot` = .data$hot_spot,
+          `Business Name` = .data$name,
+          `Type` = .data$type,
+          `Address` = .data$address,
+          `City` = .data$city,
+          `Zip` = .data$zipcode
         ) %>%
         reactable::reactable(
           filterable = TRUE,
