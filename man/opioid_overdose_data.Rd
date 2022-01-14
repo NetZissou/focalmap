@@ -16,5 +16,5 @@ focused naloxone intake forms indicators
 Load focused indicators  extracted from naloxone intake form
 }
 \examples{
-project_dawn_focused_indicators()
+opioid_overdose_data()
 }

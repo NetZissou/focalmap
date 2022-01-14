@@ -98,6 +98,20 @@ get_response_area_sf <- function() {
   )
 }
 
+#' Load naloxone box shapefiles
+#'
+#' @return sf object
+#' @export
+#'
+get_naloxone_box_sf <- function() {
+  # TODO: Fix this path
+  path <- paste0("/fs/ess/PDE0001/naloxone box location/naloxone_box_shapefiles")
+
+  data <- sf::read_sf(path)
+  return(
+    data
+  )
+}
 
 
 
