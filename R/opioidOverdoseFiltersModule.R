@@ -41,11 +41,10 @@ opioidOverdoseFiltersUI <- function(id) {
             width = 4,
             shiny::dateRangeInput(
               inputId = shiny::NS(id, "date_range"),
-              label = "Date Range (Jan/1st/2008 - July/17th/2021)",
+              label = "Date Range",
               min = "2008-01-01",
-              max = "2021-07-17",
               start = "2008-01-01",
-              end = "2021-07-17"
+              end = "2022-01-01"
             )
           )
         ),
@@ -218,6 +217,35 @@ opioidOverdoseFiltersServer <- function(id) {
       data = treatment_providers_data_all
     )
 
+    # ================================= #
+    # ---- Update Date Input Range ----
+    # ================================= #
+    shiny::observeEvent(filtered_overdose_data, {
+
+      date_range_min <-
+        as.character(
+          as.Date(
+            min(filtered_overdose_data$data$date)
+          )
+        )
+
+      date_range_max <-
+        as.character(
+          as.Date(
+            max(filtered_overdose_data$data$date)
+          )
+        )
+
+
+      shiny::updateDateRangeInput(
+        inputId = "date_range",
+        label = "Date Range",
+        start = date_range_min,
+        end = date_range_max,
+        min = date_range_min,
+        max = date_range_max
+      )
+    })
     # ================================ #
     # ---- Action Button Controls ----
     # ================================ #
