@@ -162,25 +162,6 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
         stats::na.omit()
     )
 
-    eligible_business_type <-
-      c(
-        # Library
-        "LIBRARIES-PUBLIC",
-        # Convenience/liquor stores
-        "CONVENIENCE STORES", "VARIETY STORES",
-        # Fast food places/Restaurants
-        "FOOD BANKS", "RESTAURANTS",
-        # Check cashing places
-        # Gas station
-        "SERVICE STATIONS-GASOLINE & OIL",
-        # Motels
-        # Pawn shops
-        "PAWNBROKERS"
-        # Hardware stores
-
-      )
-
-
     output$hot_spot_map <- shiny::renderPlot({
 
       data_source <- hyper_params$data_source
@@ -244,7 +225,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
             ),
             .f = opioidDashboard::get_hot_spot_business,
             business_location = oh_business,
-            eligible_business_type = eligible_business_type
+            eligible_business_type = opioidDashboard::ELIGIBLE_BUSINESS_TYPE
           )
         ) %>%
         dplyr::select(.data$business) %>%
