@@ -1,4 +1,4 @@
-FROM centos:8
+FROM rockylinux/rockylinux:8
 LABEL maintainer 'Jeff Ohrstrom <johrstrom@osc.edu>'
 
 ENV R_BASE_VERSION 4.0.3
@@ -40,12 +40,13 @@ RUN groupadd -g 2925 PZS0523 && \
     usermod -aG PDE0001 focalmap && \
     usermod -aG PDE0001 focalmapdev
 
+# build all the dependencies before you copy the app to cache these layers
 RUN Rscript -e "install.packages('devtools')"
-
 RUN mkdir /tmp/build
 COPY opioidDashboard.Rproj /tmp/build
 COPY DESCRIPTION /tmp/build
-
 RUN cd /tmp/build; Rscript -e "library ('devtools'); install()"
-COPY entrypoint.R /entrypoint.R
+
+COPY . /app
+WORKDIR /app
 
