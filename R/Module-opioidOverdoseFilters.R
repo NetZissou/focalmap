@@ -199,8 +199,9 @@ opioidOverdoseFiltersServer <- function(id) {
     # ---- Initialize source data ----
     # ================================ #
 
-    # Source data: opioid overdose data
     opioid_overdose_data_all <- opioidDashboard::opioid_overdose_data()
+
+    # Source data: opioid overdose data
     filtered_overdose_data <- shiny::reactiveValues(
       data = opioid_overdose_data_all
     )

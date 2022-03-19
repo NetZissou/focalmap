@@ -6,3 +6,6 @@
 
 #' The path of shapefiles of school districts in Franklin County
 "FRANKLIN_COUNTY_SCHOOL_DISTRICT_SF_PATH"
+
+#' Eligible business type for hot spot detection
+"ELIGIBLE_BUSINESS_TYPE"

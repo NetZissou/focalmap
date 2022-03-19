@@ -46,6 +46,17 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
         is.na(.data$destination),
         "Undocumented",
         .data$destination
+      ),
+      #  CAT age
+      age_cat = dplyr::case_when(
+        .data$age < 15 ~ "0-14",
+        .data$age < 25 ~ "15-24",
+        .data$age < 35 ~ "25-34",
+        .data$age < 45 ~ "35-44",
+        .data$age < 55 ~ "45-54",
+        .data$age < 65 ~ "55-64",
+        .data$age >= 65 ~ "65+",
+        TRUE ~ "Prefer not to say"
       )
     ) %>%
     dplyr::select(-.data$ethnicity) %>% # changed into hispanic_or_latino

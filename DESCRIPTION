@@ -57,6 +57,7 @@ Imports:
     shinyjs,
     shinyWidgets,
     snapper (>= 0.0.4),
+    stats,
     stringr,
     tibble,
     tidyr,
