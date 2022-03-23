@@ -1,6 +1,6 @@
 Package: opioidDashboard
 Title: The shiny application for opioid research and data exploration
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: 
     c(
         person(
@@ -29,12 +29,13 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports: 
     apexcharter,
     bslib,
     devtools,
     dplyr,
+    ggmap,
     ggplot2,
     highcharter,
     htmltools,
@@ -45,6 +46,7 @@ Imports:
     lubridate,
     magrittr,
     purrr,
+    reactable,
     readr,
     rlang,
     scales,
@@ -56,11 +58,13 @@ Imports:
     shinyjs,
     shinyWidgets,
     snapper (>= 0.0.4),
+    stats,
     stringr,
     tibble,
     tidyr,
     tools,
-    tsibble
+    tsibble,
+    vroom
 Depends: 
     R (>= 2.10)
 Remotes: 

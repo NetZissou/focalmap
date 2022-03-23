@@ -6,7 +6,7 @@
 #' @export
 #'
 #' @examples
-#' project_dawn_focused_indicators()
+#' opioid_overdose_data()
 opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIRECTORY) {
   data_name <- "primary_table.csv"
   data_path <- paste0(dir, "/", data_name)
@@ -46,6 +46,17 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
         is.na(.data$destination),
         "Undocumented",
         .data$destination
+      ),
+      #  CAT age
+      age_cat = dplyr::case_when(
+        .data$age < 15 ~ "0-14",
+        .data$age < 25 ~ "15-24",
+        .data$age < 35 ~ "25-34",
+        .data$age < 45 ~ "35-44",
+        .data$age < 55 ~ "45-54",
+        .data$age < 65 ~ "55-64",
+        .data$age >= 65 ~ "65+",
+        TRUE ~ "Prefer not to say"
       )
     ) %>%
     dplyr::select(-.data$ethnicity) %>% # changed into hispanic_or_latino
@@ -58,6 +69,10 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
     dplyr::rename(
       lat = .data$latitude,
       lng = .data$longitude
+    ) %>%
+    # remove one outlier from 1900-01-01
+    dplyr::filter(
+      .data$date != lubridate::ymd(19000101)
     )
   return(
     data

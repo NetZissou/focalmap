@@ -1,3 +1,17 @@
+#' The updated porject DAWN form for this application
+#'
+#'
+#' @return porject DAWN form
+#' @export
+project_dawn_app_data <- function() {
+
+  naloxone_data_all <-
+    vroom::vroom("/fs/ess/PDE0001/project_dawn/project_dawn_app_data.csv") %>%
+    dplyr::mutate(date = lubridate::mdy(.data$kit_distribution_date)) %>%
+    dplyr::select(-.data$kit_distribution_date)
+  return(naloxone_data_all)
+}
+
 #' Load focused indicators  extracted from naloxone intake form
 #'
 #' @param dir data directory on OSC that contains all of the naloxone intake forms data

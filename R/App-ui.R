@@ -10,7 +10,6 @@ ui <- function() {
     shinyjs::useShinyjs(),
     shinyWidgets::useShinydashboard(),
     shinyWidgets::useShinydashboardPlus(),
-    shinyalert::useShinyalert(),
 
     theme = bslib::bs_theme(bootswatch = "materia", font_scale = 1.1),
     shiny::navbarPage(
@@ -19,9 +18,9 @@ ui <- function() {
 
       #theme = bslib::bs_theme(bootswatch = "materia", font_scale = 1.1),
 
-      # ========================================================= #
-      # ------------ Tab: Naloxone Intake Forms -----------------
-      # ========================================================= #
+      # ================================== #
+      # ---- Tab: Opioid Overdose Map ----
+      # ================================== #
       shiny::tabPanel(title = "Opioid Overdose Map",
 
                       shiny::fluidRow(
@@ -34,16 +33,32 @@ ui <- function() {
 
       ),
 
-      # ========================================================= #
-      # ------------ Tab: Naloxone Intake Forms -----------------
-      # ========================================================= #
-      shiny::tabPanel(title = " Integrated Time Series Analysis ",
+      # =========================== #
+      # ---- Tab: Project DAWN ----
+      # =========================== #
+      # shiny::tabPanel(title = "Project DAWN (Previous)",
+      #                 shiny::fluidRow(
+      #                   naloxoneDistributionSeriesUI("kit_ts")
+      #                 ),
+      #                 shiny::fluidRow(
+      #                   naloxoneDemographicsUI("demo")
+      #                 )
+      # ),
+
+      shiny::tabPanel(title = "Project DAWN",
                       shiny::fluidRow(
-                        naloxoneDistributionSeriesUI("kit_ts")
+                        projectDAWNFilterUI("naloxone_filter")
                       ),
                       shiny::fluidRow(
-                        naloxoneDemographicsUI("demo")
+                        projectDAWNTimeSeriesUI("naloxone_ts")
                       )
+      ),
+
+      # ================================= #
+      # ---- Tab: Hot Spot Detection ----
+      # ================================= #
+      shiny::tabPanel(title = "Hot Spot Detection",
+                      hotSpotDetectionUI("hot_spot")
       )
 
 

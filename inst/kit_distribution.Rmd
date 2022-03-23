@@ -1,0 +1,304 @@
+---
+title: "Kit Distribution"
+author: "Net Zhang"
+date: "12/18/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(devtools)
+library(tidyverse)
+PERCENT_TILE <- 0.5
+```
+
+```{r warning=FALSE}
+od_data <- opioidDashboard::opioid_overdose_data()
+zip_code_map <-
+  ggplot2::ggplot() +
+  ggplot2::geom_sf(data = opioidDashboard::get_zipcode_sf())
+# ============= #
+# ---- Hex ----
+# ============= #
+hex <-
+  zip_code_map +
+  geom_hex(
+    aes(x = lng, y = lat),
+    #bins = 60,
+    binwidth = c(0.01, 0.01),
+    data = od_data
+  ) +
+  scale_fill_gradient('Overdose Cases',
+                      low = "#ffeda0",
+                      high = "#f03b20") +
+  labs(title = "Hex")
+hex_data <-
+  tibble::as_tibble(
+    ggplot2::ggplot_build(hex)$data[[2]]
+  )
+
+# ============== #
+# ---- Bins ----
+# ============== #
+bin <-
+  zip_code_map +
+  geom_bin_2d(
+    aes(x = lng, y = lat),
+    binwidth = c(0.01, 0.01),
+    #bins = 60,
+    data = od_data
+  ) +
+  scale_fill_gradient('Overdose Cases',
+                      low = "#ffeda0",
+                      high = "#f03b20") +
+  labs(title = "Bins")
+bin_data <-
+  tibble::as_tibble(
+    ggplot2::ggplot_build(bin)$data[[2]]
+  )
+# ================== #
+# ---- Contours ----
+# ================== #
+contour <-
+  zip_code_map +
+  stat_density_2d(
+    geom = "polygon",
+    aes(x = lng, y = lat, fill = ..level..),
+    #binwidth = c(0.01, 0.01),
+    #bins = 60,
+    data = od_data
+  ) +
+  scale_fill_gradient2("Overdose Cases",
+                       low = "#ffeda0", mid = "yellow", high = "#f03b20") +
+  labs(title = "Contour")
+
+# =============================== #
+# ---- OH Business Locations ----
+# =============================== #
+suppressMessages(
+  oh_business <- vroom::vroom(
+  file = "/fs/ess/PDE0001/business places data/Business-2020-OH.csv",
+  delim = ",",
+  col_names = FALSE
+) %>%
+  dplyr::transmute(
+    id = dplyr::row_number(),
+    name = .data$X1,
+    type = .data$X13,
+    address = .data$X2,
+    city = .data$X3,
+    zipcode = .data$X5,
+    lat = readr::parse_number(.data$X47),
+    lng = .data$X48
+  ) %>%
+  na.omit()
+)
+
+eligible_business_type <-
+  c(
+    # Library
+    "LIBRARIES-PUBLIC",
+    # Convenience/liquor stores
+    "CONVENIENCE STORES", "VARIETY STORES",
+    # Fast food places/Restaurants
+    "FOOD BANKS", "RESTAURANTS",
+    # Check cashing places
+    # Gas station
+    "SERVICE STATIONS-GASOLINE & OIL",
+    # Motels
+    # Pawn shops
+    "PAWNBROKERS"
+    # Hardware stores
+
+  )
+
+
+hot_spot_with_business_location <-
+  opioidDashboard::get_hot_spot_region(
+    od_data = opioidDashboard::opioid_overdose_data(),
+    percent_tile = PERCENT_TILE
+  ) %>%
+  dplyr::mutate(
+    business = purrr::pmap(
+      .l = list(
+        .data$hot_spot,
+        .data$lat_min, .data$lat_max,
+        .data$lng_min, .data$lng_max
+      ),
+      .f = opioidDashboard::get_hot_spot_business,
+      business_location = oh_business,
+      eligible_business_type = eligible_business_type
+    )
+  )
+
+eligible_business_location <- 
+  hot_spot_with_business_location %>%
+  dplyr::select(business) %>%
+  tidyr::unnest(cols = "business") %>%
+  dplyr::select(
+    hot_spot, everything()
+  ) 
+```
+
+```{r}
+hot_spot_business_kable <- function(
+  hot_spot_id,
+  eligible_business_location = eligible_business_location
+) {
+  eligible_business_location %>%
+    dplyr::filter(
+      .data$hot_spot %in%  hot_spot_id
+    ) %>%
+    dplyr::select(.data$type, .data$name, .data$address) %>%
+    dplyr::arrange(.data$type, .data$name) %>%
+    kableExtra::kbl(align = "lcc", booktabs = T) %>%
+    kableExtra::kable_styling(full_width = T)
+}
+
+hot_spot_business_map <- function(
+  hot_spot_id,
+  hot_spot_with_business_location
+) {
+  
+  base_map <- 
+    ggplot2::ggplot() +
+    ggplot2::geom_sf(data = opioidDashboard::get_zipcode_sf()) +
+    ggplot2::geom_sf_text(
+      data = opioidDashboard::get_zipcode_sf(),
+      ggplot2::aes(label = GEOID)
+    ) +
+    ggplot2::geom_bin_2d(
+      ggplot2::aes(x = lng, y = lat),
+      binwidth = c(0.01, 0.01),
+      alpha = 0.75,
+      #bins = 60,
+      data = opioidDashboard::opioid_overdose_data()
+    ) +
+    ggplot2::scale_fill_gradient(
+      'Overdose Cases',
+      low = "#ffeda0",
+      high = "#f03b20"
+    )
+  
+  hot_spot_with_business_location <- 
+    hot_spot_with_business_location %>%
+    dplyr::filter(
+      .data$hot_spot %in% hot_spot_id
+    )
+  
+  base_map +
+    ggplot2::geom_point(
+      ggplot2::aes(
+        x = lng, y = lat
+      ),
+      data = hot_spot_with_business_location$business[[1]],
+      shape = 2,
+      size = 2
+    ) +
+    ggplot2::coord_sf(
+      ylim = c(
+        hot_spot_with_business_location$lat_min-0.05,
+        hot_spot_with_business_location$lat_max+0.05
+      ),
+      xlim = c(
+        hot_spot_with_business_location$lng_min-0.05,
+        hot_spot_with_business_location$lng_max+0.05
+      )
+    )
+}
+
+
+hot_spot_business_md <- function(
+  hot_spot_id,
+  hot_spot_with_business_location,
+  eligible_business_location
+) {
+  cat('\\newpage')
+  cat('\n\n# ', "Hot spot #", hot_spot_id,'\n\n')
+  
+  print(suppressMessages(
+    hot_spot_business_map(
+      hot_spot_id = hot_spot_id,
+      hot_spot_with_business_location = hot_spot_with_business_location
+    )
+  ))
+  
+  cat(
+    hot_spot_business_kable(
+      hot_spot_id = hot_spot_id,
+      eligible_business_location = eligible_business_location
+    )
+  )
+  
+}
+```
+
+
+# Map
+
+```{r fig.height=10, fig.width=12}
+
+init_naloxBox_location_map <- 
+  bin +
+  ggplot2::geom_sf(data = opioidDashboard::get_naloxone_box_sf(), shape = 4, size = 2) +
+  geom_point(
+    aes(x = lng, y = lat) ,
+    data = eligible_business_location, color = "purple", shape = 2, alpha = 0.7
+  ) +
+  labs(title = "Initial NaloxBox Locations", 
+       subtitle = "Initial naloxBox locations are marked as 'x'\nBusiness locations are marked with triangles in purple.") +
+  theme(legend.position = "top") 
+
+init_naloxBox_location_map_zoom <- 
+  bin +
+  ggplot2::geom_sf(data = opioidDashboard::get_naloxone_box_sf(), shape = 4, size = 2) +
+  geom_point(
+    aes(x = lng, y = lat) ,
+    data = eligible_business_location, color = "purple", shape = 2, alpha = 0.7
+  ) +
+  labs(title = "Initial NaloxBox Locations", 
+       subtitle = "Initial naloxBox locations are marked as 'x'\nBusiness locations are marked with triangles in purple.") +
+  theme(legend.position = "top") +
+  coord_sf(
+    xlim = c(-83.2, -82.75),
+    ylim = c(39.8, 40.15)
+  )
+
+# ggsave(
+#   filename = "inst/init_naloxBox_location_map(75qt).tiff",
+#   plot = init_naloxBox_location_map,
+#   device = "tiff",
+#   scale = 3,
+#   dpi = 300
+# )
+# 
+# ggsave(
+#   filename = "inst/init_naloxBox_location_map_zoom(75qt).tiff",
+#   plot = init_naloxBox_location_map_zoom,
+#   device = "tiff",
+#   scale = 3,
+#   dpi = 300
+# )
+patchwork::wrap_plots(
+  init_naloxBox_location_map + labs(title = NULL, subtitle = NULL),
+  init_naloxBox_location_map_zoom + labs(title = NULL, subtitle = NULL),
+  nrow = 1
+) +
+  patchwork::plot_annotation(
+    title = "Initial NaloxBox Locations", 
+    subtitle = "Initial naloxBox locations are marked as 'x'\nBusiness locations are marked with triangles in purple."
+  )
+```
+
+```{r echo=FALSE, warning=FALSE, results='asis'}
+purrr::walk(
+  .x = hot_spot_with_business_location$hot_spot,
+  .f = hot_spot_business_md,
+  hot_spot_with_business_location = hot_spot_with_business_location,
+  eligible_business_location = eligible_business_location
+)
+```
+
+

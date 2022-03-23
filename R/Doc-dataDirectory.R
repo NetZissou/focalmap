@@ -11,3 +11,6 @@
 
 #' Treatment providers data directory
 "TREATMENT_PROVIDERS_DATA_DIRECTORY"
+
+#' Ohio business information
+"OHIO_BUSINESS_DATA_DIRECTORY"
