@@ -36,16 +36,16 @@ ui <- function() {
       # =========================== #
       # ---- Tab: Project DAWN ----
       # =========================== #
-      shiny::tabPanel(title = "Project DAWN (Previous)",
-                      shiny::fluidRow(
-                        naloxoneDistributionSeriesUI("kit_ts")
-                      ),
-                      shiny::fluidRow(
-                        naloxoneDemographicsUI("demo")
-                      )
-      ),
+      # shiny::tabPanel(title = "Project DAWN (Previous)",
+      #                 shiny::fluidRow(
+      #                   naloxoneDistributionSeriesUI("kit_ts")
+      #                 ),
+      #                 shiny::fluidRow(
+      #                   naloxoneDemographicsUI("demo")
+      #                 )
+      # ),
 
-      shiny::tabPanel(title = "Project DAWN (New)",
+      shiny::tabPanel(title = "Project DAWN",
                       shiny::fluidRow(
                         projectDAWNFilterUI("naloxone_filter")
                       ),

@@ -9,3 +9,6 @@
 
 #' Eligible business type for hot spot detection
 "ELIGIBLE_BUSINESS_TYPE"
+
+#' A static Columbus roadmap for opioid hot spot detection
+"COLUMBUS_STATIC_ROADMAP"

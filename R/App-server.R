@@ -19,8 +19,8 @@ server <- function(input, output, session) {
       by = "obs_key"
     )
 
-  naloxoneDistributionSeriesServer("kit_ts", kit_join_personal = kit_join_personal)
-  naloxoneDemographicsServer("demo", kit_join_personal = kit_join_personal)
+  # naloxoneDistributionSeriesServer("kit_ts", kit_join_personal = kit_join_personal)
+  # naloxoneDemographicsServer("demo", kit_join_personal = kit_join_personal)
 
   project_DAWN_data <- projectDAWNFilterServer("naloxone_filter")
   projectDAWNTimeSeriesServer("naloxone_ts", project_DAWN_data = project_DAWN_data)

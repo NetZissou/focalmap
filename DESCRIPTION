@@ -35,6 +35,7 @@ Imports:
     bslib,
     devtools,
     dplyr,
+    ggmap,
     ggplot2,
     highcharter,
     htmltools,
