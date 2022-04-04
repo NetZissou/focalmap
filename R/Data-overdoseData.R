@@ -1,21 +1,69 @@
 #' Load focused indicators  extracted from naloxone intake form
 #'
 #' @param dir data directory on OSC that contains all of the naloxone intake forms data
+#' @param processed load processed opioid overdose data
 #'
 #' @return focused naloxone intake forms indicators
 #' @export
 #'
 #' @examples
-#' opioid_overdose_data()
-opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIRECTORY) {
-  data_name <- "primary_table.csv"
-  data_path <- paste0(dir, "/", data_name)
+opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIRECTORY, processed = TRUE) {
+
+  if (processed) {
+    # ========================== #
+    # ---- Latest file path ----
+    # ========================== #
+    latest_data_info <-
+      check_files_update_time(
+        dir = dir,
+        regexp = "primary_table_processed.csv"
+      ) %>%
+      head(1)
+
+    latest_data_path <- latest_data_info$path
+    latest_data_modification_time <- latest_data_info$modification_time
+
+    # =================== #
+    # ---- Load file ----
+    # =================== #
+    message("Loading file: ", latest_data_path)
+    message("Modified at: ", latest_data_modification_time)
+
+    suppressWarnings(
+      suppressMessages(
+        data <-
+          vroom::vroom(
+            latest_data_path
+          )
+      )
+    )
+    return(data)
+  }
+
+  # ========================== #
+  # ---- Latest file path ----
+  # ========================== #
+  latest_data_info <-
+    check_files_update_time(
+      dir = dir,
+      regexp = "primary_table.csv"
+    ) %>%
+    head(1)
+
+  latest_data_path <- latest_data_info$path
+  latest_data_modification_time <- latest_data_info$modification_time
+
+  # =================== #
+  # ---- Load file ----
+  # =================== #
+  message("Loading file: ", latest_data_path)
+  message("Modified at: ", latest_data_modification_time)
 
   suppressWarnings(
     suppressMessages(
       data <-
-        readr::read_csv(
-          data_path
+        vroom::vroom(
+          latest_data_path
         ) %>%
         janitor::clean_names()
     )
@@ -23,6 +71,7 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
 
   data <-
     data %>%
+    #dtplyr::lazy_dt() %>%
     dplyr::mutate(
       # Use regex to extract valid text
       race = stringr::str_extract(
@@ -73,8 +122,10 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
     # remove one outlier from 1900-01-01
     dplyr::filter(
       .data$date != lubridate::ymd(19000101)
-    )
+    ) %>%
+    tibble::as_tibble()
   return(
     data
   )
 }
+
