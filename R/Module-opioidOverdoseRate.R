@@ -47,7 +47,7 @@ opioidOverdoseRateUI <- function(id) {
             label = "Date Range",
             choices = purrr::map_chr(
               .x = seq(
-                from = as.Date("2019-01-01"),
+                from = as.Date("2008-01-01"),
                 to = Sys.Date(),
                 by = "1 month"),
               .f = function(date) {
@@ -57,7 +57,7 @@ opioidOverdoseRateUI <- function(id) {
               }
             ),
             selected = purrr::map_chr(
-              .x = c(as.Date("2019-01-01"), Sys.Date()),
+              .x = c(as.Date("2008-01-01"), Sys.Date()),
               .f = function(date) {
                 year <- lubridate::year(date)
                 month_num <- lubridate::month(date)
@@ -85,7 +85,7 @@ opioidOverdoseRateUI <- function(id) {
   )
 }
 
-opioidOverdoseRateServer <- function(id, filtered_overdose_data) {
+opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
 
   shiny::moduleServer(id, function(input, output, session){
     shiny::req(
@@ -95,9 +95,60 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data) {
     # ======================== #
     # ---- A. HyperParams ----
     # ======================== #
+
     hyper_params <- shiny::reactiveValues(
-      data_source = opioidDashboard::opioid_overdose_data()
+      data_source = od_data_all,
+      data_min = as.Date("2008-01-01"),
+      data_max = Sys.Date()
     )
+
+    sf_map_data_list <-
+      shiny::reactiveValues(
+        zip = list(
+          region_sf = get_region_od_rate(
+            "zip",
+            zipcode_sf,
+            "GEOID",
+            "GEOID",
+            "TOTAL_POP",
+            od_data = od_data_all
+          ),
+          pal = opioidDashboard::od_case_rate_init_pal_list$zip
+        ),
+        census_tract = list(
+          region_sf = get_region_od_rate(
+            "census_tract",
+            census_tract_sf,
+            "GEOID",
+            "GEOID",
+            "TOTAL_POP",
+            od_data = od_data_all
+          ),
+          pal = opioidDashboard::od_case_rate_init_pal_list$census_tract
+        ),
+        school_district = list(
+          region_sf = get_region_od_rate(
+            "school_district",
+            school_district_sf %>%
+              dplyr::filter(.data$NAME %in% opioidDashboard::franklin_county_school_districts),
+            "NAME",
+            "NAME",
+            "district_pop",
+            od_data = od_data_all
+          ),
+          pal = opioidDashboard::od_case_rate_init_pal_list$school_district
+        )
+        # EMS = list(
+        #   region_sf = get_region_od_rate(
+        #     "EMS",
+        #     EMS_sf,
+        #     "DEPARTMENT",
+        #     "DEPARTMENT",
+        #     #"TOTAL_POP",
+        #     od_data = hyper_params$data_source
+        #   )
+        # )
+      )
 
 
     shiny::observeEvent(input$update_hyper_param, {
@@ -107,11 +158,77 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data) {
       # ===================================== #
       od_data_source <- input$od_data_source
 
+      data_min <- input$date_range[1]
+      data_max <- input$date_range[2]
+
       if (od_data_source == "Raw Overdose Case Data") {
-        hyper_params$data_source <- opioidDashboard::opioid_overdose_data()
+        hyper_params$data_source <- od_data_all %>%
+          dplyr::filter(
+            .data$date >= lubridate::ym(data_min),
+            .data$date <= lubridate::ym(data_max)
+          )
       } else {
-        hyper_params$data_source <- filtered_overdose_data$data
+        hyper_params$data_source <- filtered_overdose_data$data %>%
+          dplyr::filter(
+            .data$date >= lubridate::ym(data_min),
+            .data$date <= lubridate::ym(data_max)
+          )
       }
+
+
+      sf_map_data_list$zip$region_sf <-
+        get_region_od_rate(
+          "zip",
+          zipcode_sf,
+          "GEOID",
+          "GEOID",
+          "TOTAL_POP",
+          od_data = hyper_params$data_source
+        )
+
+      sf_map_data_list$census_tract$region_sf <-
+        get_region_od_rate(
+          "census_tract",
+          census_tract_sf,
+          "GEOID",
+          "GEOID",
+          "TOTAL_POP",
+          od_data = hyper_params$data_source
+        )
+
+
+      sf_map_data_list$school_district$region_sf <-
+        get_region_od_rate(
+          "school_district",
+          school_district_sf %>%
+            dplyr::filter(.data$NAME %in% opioidDashboard::franklin_county_school_districts),
+          "NAME",
+          "NAME",
+          "district_pop",
+          od_data = hyper_params$data_source
+        )
+
+
+      sf_map_data_list$zip$pal <-
+        leaflet::colorQuantile(
+          palette = "YlOrRd",
+          domain = sf_map_data_list$zip$region_sf$rate_pal,
+          n = 5
+        )
+
+      sf_map_data_list$census_tract$pal <-
+        leaflet::colorQuantile(
+          palette = "YlOrRd",
+          domain = sf_map_data_list$census_tract$region_sf$rate_pal,
+          n = 5
+        )
+
+      sf_map_data_list$school_district$pal <-
+        leaflet::colorQuantile(
+          palette = "YlOrRd",
+          domain = sf_map_data_list$school_district$region_sf$rate_pal,
+          n = 5
+        )
 
     })
 
@@ -132,6 +249,9 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data) {
     zipcode_sf <-
       get_zipcode_sf()
 
+    EMS_sf <-
+      get_EMS_sf()
+
     output$od_case_rate_map <-  leaflet::renderLeaflet({
 
       opioid_overdose_map_init_bounds <- opioidDashboard::opioid_overdose_map_init_bounds
@@ -151,15 +271,125 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data) {
         lng2 = opioid_overdose_map_init_bounds$max_lng,
         lat2 = opioid_overdose_map_init_bounds$max_lat
       )  %>%
+        # =================== #
+        # ---- Case Rate ----
+      # ==================== #
+      leaflet::addPolygons(
+        data = sf_map_data_list$zip$region_sf,
+        group = "Zip Code",
+        stroke = TRUE,
+        color = ~sf_map_data_list$zip$pal(rate_pal),
+        weight = 1,
+        #opacity = 0.8,
+        dashArray = "3",
+        #fillOpacity = 0.1,
+
+        label = ~ label %>% lapply(htmltools::HTML),
+
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
+          ),
+          textsize = "15px",
+          direction = "auto"
+        ),
+
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
+        # leaflet::addLegend(
+        #   data = sf_map_data_list$zip$region_sf,
+        #   position = "bottomright",
+        #   pal = od_case_rate_init_pal_list$zip,
+        #   values = ~rate_pal,
+        #   group = "Zip Code"
+        # ) %>%
+
+        # ============================ #
+        # ---- FC School District ----
+      # ============================ #
+      leaflet::addPolygons(
+        data = sf_map_data_list$school_district$region_sf,
+        group = "FC school district",
+        stroke = TRUE,
+        color = ~sf_map_data_list$school_district$pal(rate_pal),
+        weight = 1,
+        #opacity = 0.8,
+        dashArray = "3",
+        #fillOpacity = 0.1,
+
+        label = ~ label %>% lapply(htmltools::HTML),
+
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
+          ),
+          textsize = "15px",
+          direction = "auto"
+        ),
+
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
+        # ====================== #
+        # ---- Census Tract ----
+      # ====================== #
+      leaflet::addPolygons(
+        data = sf_map_data_list$census_tract$region_sf,
+        group = "Census Tract",
+        stroke = TRUE,
+        color = ~sf_map_data_list$census_tract$pal(rate_pal),
+        weight = 1,
+        #opacity = 0.8,
+        dashArray = "3",
+        #fillOpacity = 0.1,
+
+        label = ~ label %>% lapply(htmltools::HTML),
+
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
+          ),
+          textsize = "15px",
+          direction = "auto"
+        ),
+
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
         # ======================== #
         # ---- Layers Control ----
       # ======================== #
       leaflet::addLayersControl(
         position = "topright",
         baseGroups = c(
-          "FC School Districts",
+          "Zip Code",
           "Census Tract",
-          "Zip Code"
+          "FC school district"
         ),
         options = leaflet::layersControlOptions(collapsed = FALSE)
       ) %>%
@@ -172,73 +402,115 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data) {
 
     })
 
-    shiny::observe({
-
-      od_zip_freq <-
-        hyper_params$data_source %>%
-        dplyr::count(.data$zip_sf) %>%
-        dplyr::transmute(
-          zip_sf = as.character(.data$zip_sf),
-          n = .data$n
-        )
-
-      map_zipcode_sf <-
-        zipcode_sf %>%
-        dplyr::left_join(
-          od_zip_freq,
-          by = c("GEOID" = "zip_sf")
-        ) %>%
-        dplyr::mutate(
-          n = ifelse(is.na(.data$n), 0, .data$n),
-          rate = .data$n/.data$TOTAL_POP
-        )
-
-      pal <- leaflet::colorQuantile(
-        palette = "YlOrRd",
-        domain = map_zipcode_sf$rate,
-        n = 3
-      )
-
+    shiny::observeEvent(input$update_hyper_param, {
 
 
       leaflet::leafletProxy("od_case_rate_map") %>%
-        # leaflet::leaflet() %>%
-        # leaflet::addTiles() %>%
-        # leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) %>%
         leaflet::clearShapes() %>%
-        leaflet::addPolygons(
-          data = map_zipcode_sf,
-          group = "Zip Code",
-          stroke = TRUE,
-          color = ~pal(rate),
-          weight = 1,
-          #opacity = 0.8,
-          dashArray = "3",
-          #fillOpacity = 0.1,
+        # ================== #
+        # ---- Zip Code ----
+      # ================== #
 
-          label = ~ paste0(
-            "<b>", GEOID, "</b>"
-          ) %>% lapply(htmltools::HTML),
+      leaflet::addPolygons(
+        data = sf_map_data_list$zip$region_sf,
+        group = "Zip Code",
+        stroke = TRUE,
+        color = ~sf_map_data_list$zip$pal(rate_pal),
+        weight = 1,
+        #opacity = 0.8,
+        dashArray = "3",
+        #fillOpacity = 0.1,
 
-          labelOptions = leaflet::labelOptions(
-            style = list(
-              "font-weight" = "normal",
-              padding = "3px 8px"
-            ),
-            textsize = "15px",
-            direction = "auto"
+        label = ~ label %>% lapply(htmltools::HTML),
+
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
           ),
+          textsize = "15px",
+          direction = "auto"
+        ),
 
-          highlight = leaflet::highlightOptions(
-            weight = 3,
-            fillOpacity = 0.1,
-            color = "black",
-            dashArray = "",
-            opacity = 0.5,
-            bringToFront = TRUE,
-            sendToBack = TRUE
-          )
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
         )
+      ) %>%
+
+        # ============================ #
+        # ---- FC School District ----
+      # ============================ #
+      leaflet::addPolygons(
+        data = sf_map_data_list$school_district$region_sf,
+        group = "FC school district",
+        stroke = TRUE,
+        color = ~sf_map_data_list$school_district$pal(rate_pal),
+        weight = 1,
+        #opacity = 0.8,
+        dashArray = "3",
+        #fillOpacity = 0.1,
+
+        label = ~ label %>% lapply(htmltools::HTML),
+
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
+          ),
+          textsize = "15px",
+          direction = "auto"
+        ),
+
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
+        # ====================== #
+        # ---- Census Tract ----
+      # ====================== #
+      leaflet::addPolygons(
+        data = sf_map_data_list$census_tract$region_sf,
+        group = "Census Tract",
+        stroke = TRUE,
+        color = ~sf_map_data_list$census_tract$pal(rate_pal),
+        weight = 1,
+        #opacity = 0.8,
+        dashArray = "3",
+        #fillOpacity = 0.1,
+
+        label = ~ label %>% lapply(htmltools::HTML),
+
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
+          ),
+          textsize = "15px",
+          direction = "auto"
+        ),
+
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      )
     })
 
 
