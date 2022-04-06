@@ -107,6 +107,9 @@ opioidOverdoseFiltersUI <- function(id) {
         ),
 
         shiny::h4("Treatment Providers"),
+        shiny::textOutput(
+          outputId = shiny::NS(id, "available_treatment_providers")
+        ),
         shiny::fluidRow(
           shiny::column(
             width = 12,
@@ -115,7 +118,7 @@ opioidOverdoseFiltersUI <- function(id) {
               label = "Service Type",
               multiple = TRUE,
               selected = "",
-              choices = NULL
+              choices = opioidDashboard::filter_selection_treatment_providers_service
             ),
 
             shiny::selectizeInput(
@@ -217,6 +220,72 @@ opioidOverdoseFiltersServer <- function(id) {
     filtered_treatment_providers_data <- shiny::reactiveValues(
       data = treatment_providers_data_all
     )
+
+    n_treatment_providers <- shiny::reactiveValues(
+      value = nrow(treatment_providers_data_all)
+    )
+
+    output$available_treatment_providers <- shiny::renderText({
+
+      text <- paste0(
+        "Number of avaiable treatment providers: ",
+        n_treatment_providers$value
+      )
+      return(text)
+    })
+
+    shiny::observe({
+
+      df <- treatment_providers_data_all
+
+      n <- nrow(df)
+
+      if (!nothing_selected(input$treatment_providers_spec)) {
+
+        filtered_providers_id <-
+          df  %>%
+          tidyr::pivot_longer(
+            cols = opioidDashboard::filter_selection_treatment_providers_spec,
+            names_to = "spec",
+            values_to = "status"
+          ) %>%
+          dplyr::filter(
+            .data$spec %in% input$treatment_providers_spec,
+            .data$status == TRUE
+          ) %>%
+          dplyr::distinct(.data$id) %>%
+          dplyr::pull(.data$id)
+
+        df <-
+          df %>%
+          dplyr::filter(
+            .data$id %in% filtered_providers_id
+          )
+        n <- nrow(df)
+      }
+
+      if (!nothing_selected(input$treatment_providers_service)) {
+        df <-
+          df %>%
+          dplyr::mutate(
+            service_flag = purrr::pmap_lgl(
+              .l = list(.data$service_list),
+              .f = function(service_list, selection) {
+                n <- selection %in% service_list
+                return(
+                  sum(n) == length(n)
+                )
+              },
+              selection = input$treatment_providers_service
+            )
+          ) %>%
+          dplyr::filter(.data$service_flag)
+
+        n <- nrow(df)
+      }
+
+      n_treatment_providers$value <- n
+    })
 
     # ================================= #
     # ---- Update Date Input Range ----
@@ -416,7 +485,24 @@ opioidOverdoseFiltersServer <- function(id) {
           dplyr::filter(
             .data$id %in% filtered_providers_id
           )
-        print(filtered_treatment_providers_data$data)
+      }
+
+      if (!nothing_selected(input$treatment_providers_service)) {
+        filtered_treatment_providers_data$data <-
+          filtered_treatment_providers_data$data %>%
+          dplyr::mutate(
+            service_flag = purrr::pmap_lgl(
+              .l = list(.data$service_list),
+              .f = function(service_list, selection) {
+                n <- selection %in% service_list
+                return(
+                  sum(n) == length(n)
+                )
+              },
+              selection = input$treatment_providers_service
+            )
+          ) %>%
+          dplyr::filter(.data$service_flag)
       }
 
 

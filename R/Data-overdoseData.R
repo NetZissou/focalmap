@@ -34,6 +34,9 @@ opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIR
         data <-
           vroom::vroom(
             latest_data_path
+          ) %>%
+          dplyr::mutate(
+            zip = ifelse(is.na(.data$zip), .data$zip_sf, .data$zip)
           )
       )
     )
