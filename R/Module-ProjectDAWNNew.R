@@ -10,7 +10,7 @@ projectDAWNFilterUI <- function(id) {
           label = "Date Range",
           choices = purrr::map_chr(
             .x = seq(
-              from = as.Date("2019-01-01"),
+              from = as.Date("2020-01-01"),
               to = Sys.Date(),
               by = "1 month"),
             .f = function(date) {
@@ -20,7 +20,7 @@ projectDAWNFilterUI <- function(id) {
             }
           ),
           selected = purrr::map_chr(
-            .x = c(as.Date("2019-01-01"), Sys.Date()),
+            .x = c(as.Date("2020-01-01"), Sys.Date()),
             .f = function(date) {
               year <- lubridate::year(date)
               month_num <- lubridate::month(date)
@@ -36,7 +36,7 @@ projectDAWNFilterUI <- function(id) {
 projectDAWNFilterServer <- function(id) {
   shiny::moduleServer(id, function(input, output, session) {
 
-    # TODO: warp functions
+    # TODO: wrap functions
     naloxone_data_all <- opioidDashboard::project_dawn_app_data()
 
     opioid_overdose_data_all <- opioidDashboard::opioid_overdose_data()
@@ -49,18 +49,41 @@ projectDAWNFilterServer <- function(id) {
 
     shiny::observe({
 
+      # print(paste0(
+      #   "Filter min: ",
+      #   lubridate::ym(input$date_range[1])
+      # ))
+      # print(paste0(
+      #   "Filter max: ",
+      #   lubridate::ym(input$date_range[2])
+      # ))
+
       project_DAWN_data$naloxone_data <-
         naloxone_data_all %>%
         dplyr::filter(
-          .data$date >= lubridate::ym(input$date_range[1]),
-          .data$date <= lubridate::ym(input$date_range[2])
+          .data$date > lubridate::ym(input$date_range[1]),
+          .data$date < lubridate::ym(input$date_range[2])
         )
+
+      naloxone_date_max <-
+        max(project_DAWN_data$naloxone_data$date)
+      naloxone_date_min <-
+        min(project_DAWN_data$naloxone_data$date)
+
+      # print(paste0(
+      #   "Naloxone min: ",
+      #   naloxone_date_min
+      # ))
+      # print(paste0(
+      #   "Naloxone max: ",
+      #   naloxone_date_max
+      # ))
 
       project_DAWN_data$overdose_data <-
         opioid_overdose_data_all %>%
         dplyr::filter(
-          .data$date >= lubridate::ym(input$date_range[1]),
-          .data$date <= lubridate::ym(input$date_range[2])
+          .data$date >= naloxone_date_min,
+          .data$date <= naloxone_date_max
         )
     })
 

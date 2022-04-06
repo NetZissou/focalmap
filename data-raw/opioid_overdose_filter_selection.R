@@ -8,7 +8,9 @@ library(scales)
 od_data <-
   opioidDashboard::opioid_overdose_data()
 
-# agency
+# ================ #
+# ---- agency ----
+# ================ #
 agency_tbl <-
   od_data %>%
   dplyr::count(.data$agency) %>%
@@ -27,7 +29,9 @@ filter_selection_agency <-
     )
   )
 
-# destination
+# ===================== #
+# ---- destination ----
+# ===================== #
 destination_tbl <-
   od_data %>%
   dplyr::count(.data$destination) %>%
@@ -46,7 +50,9 @@ filter_selection_destination <-
     )
   )
 
-# zip code
+# ================== #
+# ---- zip code ----
+# ================== #
 
 zip_tbl <-
   od_data %>%
@@ -63,7 +69,10 @@ filter_selection_zip <- c(
   zip_tbl$zip
 )
 
-# location type
+# ======================= #
+# ---- location type ----
+# ======================= #
+
 location_type_tbl <-
   od_data %>%
   dplyr::count(.data$location_type) %>%
@@ -81,7 +90,6 @@ filter_selection_location_type <-
       location_type_tbl$selection
     )
   )
-
 
 usethis::use_data(filter_selection_agency, overwrite = TRUE)
 usethis::use_data(filter_selection_destination, overwrite = TRUE)

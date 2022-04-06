@@ -4,17 +4,19 @@
 \alias{opioid_overdose_data}
 \title{Load focused indicators  extracted from naloxone intake form}
 \usage{
-opioid_overdose_data(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIRECTORY)
+opioid_overdose_data(
+  dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIRECTORY,
+  processed = TRUE
+)
 }
 \arguments{
 \item{dir}{data directory on OSC that contains all of the naloxone intake forms data}
+
+\item{processed}{load processed opioid overdose data}
 }
 \value{
 focused naloxone intake forms indicators
 }
 \description{
 Load focused indicators  extracted from naloxone intake form
-}
-\examples{
-opioid_overdose_data()
 }

@@ -114,6 +114,36 @@ treatment_providers_data <- function(
       )
     )
 
+  # =========================== #
+  # ---- Service Type List ----
+  # =========================== #
+  service_type_tbl <- data %>%
+    dplyr::transmute(
+      id = .data$id,
+      service_list = stringr::str_split(.data$services, pattern = ", ")
+    ) %>%
+    tidyr::unnest(.data$service_list) %>%
+    dplyr::filter(.data$service_list != "Equine)") %>%
+    dplyr::mutate(
+      service_list = ifelse(
+        .data$service_list == "Alternative Therapy (Art",
+        "Alternative Therapy (Art, Equine)",
+        .data$service_list
+      ),
+      service_list = stringr::str_trim(.data$service_list, side = "both")
+    ) %>%
+    dplyr::group_by(.data$id) %>%
+    dplyr::summarise(
+      service_list = list(.data$service_list)
+    )
+
+  data <-
+    data %>%
+    dplyr::left_join(
+      service_type_tbl,
+      by = "id"
+    )
+
   # =============================== #
   # ---- Only tier 2 providers ----
   # =============================== #

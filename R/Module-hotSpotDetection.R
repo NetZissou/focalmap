@@ -558,6 +558,16 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
           sendToBack = TRUE
         )
       ) %>%
+        # ================= #
+        # ---- Heatmap ----
+        # ================= #
+      # TODO: Heatmap
+      # leaflet.extras::addHeatmap(
+      #   data = hyper_params$data_source,
+      #   lng = ~lng,
+      #   lat = ~lat,
+      #   blur = 20, max = 0.05, radius = 15
+      # ) %>%
 
         # ======================== #
         # ---- Layers Control ----
