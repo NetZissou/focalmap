@@ -102,6 +102,21 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
       data_max = Sys.Date()
     )
 
+    school_district_sf <-
+      get_ohio_school_district_sf()
+
+    fire_districts_sf <-
+      get_fire_district_sf()
+
+    census_tract_sf <-
+      get_census_tract_sf()
+
+    zipcode_sf <-
+      get_zipcode_sf()
+
+    EMS_sf <-
+      get_EMS_sf()
+
     sf_map_data_list <-
       shiny::reactiveValues(
         zip = list(
@@ -236,21 +251,6 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
     # ============================= #
     # ---- B. Case Rate Map () ----
     # ============================= #
-
-    school_district_sf <-
-      get_ohio_school_district_sf()
-
-    fire_districts_sf <-
-      get_fire_district_sf()
-
-    census_tract_sf <-
-      get_census_tract_sf()
-
-    zipcode_sf <-
-      get_zipcode_sf()
-
-    EMS_sf <-
-      get_EMS_sf()
 
     output$od_case_rate_map <-  leaflet::renderLeaflet({
 
