@@ -33,18 +33,16 @@ projectDAWNFilterUI <- function(id) {
   )
 }
 
-projectDAWNFilterServer <- function(id) {
+projectDAWNFilterServer <- function(id, od_data_all) {
   shiny::moduleServer(id, function(input, output, session) {
 
     # TODO: wrap functions
     naloxone_data_all <- opioidDashboard::project_dawn_app_data()
 
-    opioid_overdose_data_all <- opioidDashboard::opioid_overdose_data()
-
 
     project_DAWN_data <- shiny::reactiveValues(
       naloxone_data = naloxone_data_all,
-      overdose_data = opioid_overdose_data_all
+      overdose_data = od_data_all
     )
 
     shiny::observe({
@@ -80,7 +78,7 @@ projectDAWNFilterServer <- function(id) {
       # ))
 
       project_DAWN_data$overdose_data <-
-        opioid_overdose_data_all %>%
+        od_data_all %>%
         dplyr::filter(
           .data$date >= naloxone_date_min,
           .data$date <= naloxone_date_max

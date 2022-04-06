@@ -111,7 +111,7 @@ hotSpotDetectionUI <- function(id) {
 }
 
 
-hotSpotDetectionServer <- function(id, filtered_overdose_data) {
+hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
 
   shiny::moduleServer(id, function(input, output, session){
     shiny::req(
@@ -121,8 +121,10 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
     # ============================ #
     # ---- A. Hyperparameters ----
     # ============================ #
+
+
     hyper_params <- shiny::reactiveValues(
-      data_source = opioidDashboard::opioid_overdose_data(),
+      data_source = od_data_all,
       bin_width = 0.01,
       quantile = 0.75
     )
@@ -135,7 +137,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
       od_data_source <- input$od_data_source
 
       if (od_data_source == "Raw Overdose Case Data") {
-        hyper_params$data_source <- opioidDashboard::opioid_overdose_data()
+        hyper_params$data_source <- od_data_all
       } else {
         hyper_params$data_source <- filtered_overdose_data$data
       }
@@ -161,7 +163,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
     # ---- Hot Spot Region Data for heatmap ---- #
     hot_spot_region <- shiny::reactiveValues(
       value = opioidDashboard::get_hot_spot_region(
-        od_data = opioidDashboard::opioid_overdose_data(),
+        od_data = od_data_all,
         percent_tile = 0.75,
         bin_width = c(0.01, 0.01)
       )
@@ -170,7 +172,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data) {
     # ---- Hot Spot Business Data ----- #
     hot_spot_business <- shiny::reactiveValues(
       value = opioidDashboard::get_hot_spot_region(
-        od_data = opioidDashboard::opioid_overdose_data(),
+        od_data = od_data_all,
         percent_tile = 0.75,
         bin_width = c(0.01, 0.01)
       ) %>%

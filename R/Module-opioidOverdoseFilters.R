@@ -35,8 +35,30 @@ opioidOverdoseFiltersUI <- function(id) {
         ),
 
         shiny::h4("Temporal"),
+        shinyWidgets::sliderTextInput(
+          inputId = shiny::NS(id, "date_range_dummy"),
+          label = "Date Range",
+          choices = purrr::map_chr(
+            .x = seq(
+              from = as.Date("2008-01-01"),
+              to = Sys.Date(),
+              by = "1 month"),
+            .f = function(date) {
+              year <- lubridate::year(date)
+              month_num <- lubridate::month(date)
+              return(paste0(year, "-", month_num))
+            }
+          ),
+          selected = purrr::map_chr(
+            .x = c(as.Date("2008-01-01"), Sys.Date()),
+            .f = function(date) {
+              year <- lubridate::year(date)
+              month_num <- lubridate::month(date)
+              return(paste0(year, "-", month_num))
+            }
+          )
+        ),
         shiny::fluidRow(
-
           shiny::column(
             width = 4,
             shiny::dateRangeInput(
@@ -195,18 +217,16 @@ opioidOverdoseFiltersUI <- function(id) {
   )
 }
 
-opioidOverdoseFiltersServer <- function(id) {
+opioidOverdoseFiltersServer <- function(id, od_data_all) {
 
   shiny::moduleServer(id, function(input, output, session){
     # ================================ #
     # ---- Initialize source data ----
     # ================================ #
 
-    opioid_overdose_data_all <- opioidDashboard::opioid_overdose_data()
-
     # Source data: opioid overdose data
     filtered_overdose_data <- shiny::reactiveValues(
-      data = opioid_overdose_data_all
+      data = od_data_all
     )
 
     # Source data: drug crime data
@@ -382,7 +402,7 @@ opioidOverdoseFiltersServer <- function(id) {
 
       # Re-initialize the data to make sure that
       # we are not shrinking the data everytime the users update the filters
-      filtered_overdose_data$data <- opioid_overdose_data_all
+      filtered_overdose_data$data <- od_data_all
       filtered_drug_crime_data$data <- drug_crime_data_all
       filtered_treatment_providers_data$data <- treatment_providers_data_all
 
