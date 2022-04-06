@@ -61,3 +61,30 @@ load_map_shapefile <- function(file, crs = 4326) {
 
   return(map_data)
 }
+
+
+
+#' Check the updated time of files in a specified folder
+#'
+#' @param dir file directory
+#' @param regexp 	A regular expression to filter paths
+#'
+#' @return return the a tibble with the first column `path` contains all of the
+#' matched files path and second column `modification_time` contains the modification time of the file
+#' @export
+#' @importFrom rlang ".data"
+#' @importFrom utils "head"
+check_files_update_time <- function(
+  dir,
+  regexp
+) {
+  fs::dir_info(
+    dir,
+    regexp = regexp
+  ) %>%
+    dplyr::select(
+      .data$path, .data$modification_time
+    ) %>%
+    dplyr::arrange(dplyr::desc(.data$modification_time))
+}
+

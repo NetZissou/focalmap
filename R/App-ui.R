@@ -59,6 +59,13 @@ ui <- function() {
       # ================================= #
       shiny::tabPanel(title = "Hot Spot Detection",
                       hotSpotDetectionUI("hot_spot")
+      ),
+
+      # ======================================== #
+      # ---- Tab: Opioid Overdose Case Rate ----
+      # ======================================== #
+      shiny::tabPanel(title = "Case Rate Map",
+                      opioidOverdoseRateUI("od_case_rate")
       )
 
 
