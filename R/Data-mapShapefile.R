@@ -8,9 +8,18 @@
 #' get_ohio_school_district_sf()
 get_ohio_school_district_sf <- function() {
 
-  data <- load(opioidDashboard::OHIO_SCHOOL_DISTRICT_SF_PATH)
+  data <-
+    sf::read_sf(opioidDashboard::OHIO_SCHOOL_DISTRICT_SF_PATH) %>%
+    purrr::set_names(
+      c(
+        "NAME", "district_id", "old_district_id",
+        "center_long", "center_lat", "school_district",
+        "district_pop", "district_school_pop",
+        "district_poverty_children_pop", "geometry"
+      )
+    )
   return(
-    get(data)
+    data
   )
 }
 
@@ -24,10 +33,9 @@ get_ohio_school_district_sf <- function() {
 #' get_franklin_county_school_district_sf()
 get_franklin_county_school_district_sf <- function() {
 
-  data <- load(opioidDashboard::FRANKLIN_COUNTY_SCHOOL_DISTRICT_SF_PATH)
-  return(
-    get(data)
-  )
+  data <-
+    get_ohio_school_district_sf() %>%
+    dplyr::filter(.data$NAME %in% opioidDashboard::franklin_county_school_districts)
 }
 
 #' Load fire district shapefiles
@@ -74,6 +82,21 @@ get_census_tract_sf <- function() {
 get_zipcode_sf <- function() {
 
   path = paste0("/fs/ess/PDE0001/geographies/", "zipcodes")
+
+  data <- sf::read_sf(path)
+  return(
+    data
+  )
+}
+
+
+#' Load EMS shapefile
+#'
+#' @return sf object
+#' @export
+get_EMS_sf <- function() {
+
+  path = paste0("/fs/ess/PDE0001/geographies/", "EMS")
 
   data <- sf::read_sf(path)
   return(

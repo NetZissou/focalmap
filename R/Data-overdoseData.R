@@ -5,8 +5,6 @@
 #'
 #' @return focused naloxone intake forms indicators
 #' @export
-#'
-#' @examples
 opioid_overdose_data <- function(dir = opioidDashboard::OPIOID_OVERDOSE_DATA_DIRECTORY, processed = TRUE) {
 
   if (processed) {
