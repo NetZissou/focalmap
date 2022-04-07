@@ -153,22 +153,45 @@ projectDAWNTimeSeriesServer <- function(id, project_DAWN_data) {
         if (case_od_group(input$group_level_1) != "none") {
           groups <-
             c(groups, case_od_group(input$group_level_1))
+
+          ts_data <-
+            project_DAWN_data$overdose_data %>%
+            dplyr::mutate(
+              date = tsibble::yearmonth(.data$date)
+            ) %>%
+            dplyr::group_by(
+              dplyr::across(.cols = groups)
+            ) %>%
+            dplyr::summarise(n = dplyr::n()) %>%
+            #stats::na.omit() %>%
+            tsibble::as_tsibble(index = .data$date, key =.data[[groups[-1]]]) %>%
+            tsibble::group_by_key() %>%
+            tsibble::fill_gaps(n = 0) %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(
+              date = as.Date(.data$date)
+            )
+        } else {
+          ts_data <-
+            project_DAWN_data$overdose_data %>%
+            dplyr::mutate(
+              date = tsibble::yearmonth(.data$date)
+            ) %>%
+            dplyr::group_by(
+              dplyr::across(.cols = groups)
+            ) %>%
+            dplyr::summarise(n = dplyr::n()) %>%
+            stats::na.omit() %>%
+            tsibble::as_tsibble(index = .data$date) %>%
+            tsibble::fill_gaps(n = 0) %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(
+              date = as.Date(.data$date)
+            )
         }
 
 
-        ts_data <-
-          project_DAWN_data$overdose_data %>%
-          dplyr::mutate(
-            date = tsibble::yearmonth(.data$date)
-          ) %>%
-          dplyr::group_by(
-            dplyr::across(.cols = groups)
-          ) %>%
-          dplyr::summarise(n = dplyr::n()) %>%
-          dplyr::mutate(
-            date = as.Date(.data$date)
-          ) %>%
-          stats::na.omit()
+
 
         if (length(groups) == 1) {
           ts_plot <-
@@ -232,22 +255,46 @@ projectDAWNTimeSeriesServer <- function(id, project_DAWN_data) {
         if (input$group_level_1 != "none") {
           groups <-
             c(groups, input$group_level_1)
+
+          ts_data <-
+            project_DAWN_data$naloxone_data %>%
+            dplyr::mutate(
+              date = tsibble::yearmonth(.data$date)
+            ) %>%
+            dplyr::group_by(
+              dplyr::across(.cols = groups)
+            ) %>%
+            dplyr::summarise_at(
+              dplyr::vars(.data$kit_number), .f = list(n = ~sum(.x, na.rm = TRUE))) %>%
+            #stats::na.omit() %>%
+            tsibble::as_tsibble(index = .data$date, key =.data[[groups[-1]]]) %>%
+            tsibble::group_by_key() %>%
+            tsibble::fill_gaps(n = 0) %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(
+              date = as.Date(.data$date)
+            )
+        } else {
+          ts_data <-
+            project_DAWN_data$naloxone_data %>%
+            dplyr::mutate(
+              date = tsibble::yearmonth(.data$date)
+            ) %>%
+            dplyr::group_by(
+              dplyr::across(.cols = groups)
+            ) %>%
+            dplyr::summarise_at(
+              dplyr::vars(.data$kit_number), .f = list(n = ~sum(.x, na.rm = TRUE))) %>%
+            stats::na.omit() %>%
+            tsibble::as_tsibble(index = .data$date) %>%
+            tsibble::fill_gaps(n = 0) %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(
+              date = as.Date(.data$date)
+            )
         }
 
-        ts_data <-
-          project_DAWN_data$naloxone_data %>%
-          dplyr::mutate(
-            date = tsibble::yearmonth(.data$date)
-          ) %>%
-          dplyr::group_by(
-            dplyr::across(.cols = groups)
-          ) %>%
-          dplyr::summarise_at(
-            dplyr::vars(.data$kit_number), .f = list(n = ~sum(.x, na.rm = TRUE))) %>%
-          dplyr::mutate(
-            date = as.Date(.data$date)
-          ) %>%
-          stats::na.omit()
+
 
         if (input$group_level_1 == "none") {
           ts_plot <-
