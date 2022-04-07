@@ -35,7 +35,7 @@ get_region_od_rate <- function(
     ) %>%
     dplyr::mutate(
       n = ifelse(is.na(.data$n), 0, .data$n),
-      rate = .data$n/.data[[pop_colname]],
+      rate = (.data$n/.data[[pop_colname]])*1e5,
       label = purrr::pmap_chr(
         .l = list(.data[[label_colname]], .data$n, .data$rate, .data[[pop_colname]]),
         .f = function(label, n, rate, pop) {
@@ -44,18 +44,30 @@ get_region_od_rate <- function(
             rate <- 0
           }
 
-          round_rate_label <-  paste0(round(rate, 4)*1e2, "%")
+          #round_rate_label <-  paste0(round(rate, 4)*1e2, "%")
 
-          paste0(
-            "<b>", label, "</b>",
-            "<br/>",
-            "Count: ", n,
-            "<br/>",
-            "Rate: ", round_rate_label,
-            "<br/>",
-            "Population: ", scales::number(pop)
-          )
+          text <-
+            paste0(
+              "<b>", label, "</b>",
+              "<br/>",
+              "Count: ", n,
+              "<br/>",
+              "Rate: ", scales::number(rate, big.mark = ","), " per 100,000",
+              "<br/>",
+              "Population: ", scales::number(pop, big.mark = ",")
+            )
 
+          if (n < 11) {
+            text <-
+              paste0(
+                text,
+                "<br/",
+                "<b>",
+                "Interpret with caution due to <11 cases for selected time period",
+                "</b>"
+              )
+          }
+          return(text)
         }
       ),
       rate_pal = purrr::map_dbl(
