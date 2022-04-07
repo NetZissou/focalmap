@@ -35,7 +35,7 @@ opioidOverdoseRateUI <- function(id) {
           width = 3,
           shiny::actionButton(
             inputId = shiny::NS(id, "update_hyper_param"),
-            label = "Update Hyperparameters"
+            label = "Update Map"
           )
         )
       ),

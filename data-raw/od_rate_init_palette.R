@@ -3,7 +3,7 @@ overdose_case_rate_palette <- "YlOrRd"
 od_data_all <- opioidDashboard::opioid_overdose_data()
 zip_region_sf <- get_region_od_rate(
   "zip",
-  zipcode_sf,
+  get_zipcode_sf(),
   "GEOID",
   "GEOID",
   "TOTAL_POP",
@@ -13,7 +13,7 @@ zip_region_sf <- get_region_od_rate(
 
 census_tract_region_sf <- get_region_od_rate(
   "census_tract",
-  census_tract_sf,
+  get_census_tract_sf(),
   "GEOID",
   "GEOID",
   "TOTAL_POP",
@@ -22,7 +22,7 @@ census_tract_region_sf <- get_region_od_rate(
 
 school_district_region_sf <- get_region_od_rate(
   "school_district",
-  school_district_sf %>%
+  get_ohio_school_district_sf() %>%
     dplyr::filter(.data$NAME %in% franklin_county_school_districts),
   "NAME",
   "NAME",
