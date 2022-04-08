@@ -237,6 +237,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
         ggplot2::geom_bin_2d(
           ggplot2::aes(x = .data$lng, y = .data$lat),
           binwidth = c(bin_width, bin_width),
+          alpha = 0.75,
           data = data_source
         ) +
         ggplot2::geom_text(
@@ -396,6 +397,23 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
 
       opioid_overdose_map_init_bounds <- opioidDashboard::opioid_overdose_map_init_bounds
 
+      data_source <- hyper_params$data_source
+      bin_width <- hyper_params$bin_width
+      quantile <- hyper_params$quantile
+
+      heatmap_data <-
+        ggplot2::layer_data(
+          ggplot2::ggplot() +
+            ggplot2::geom_bin_2d(
+              ggplot2::aes(x = .data$lng, y = .data$lat),
+              binwidth = c(bin_width, bin_width),
+              data = data_source
+            ) +
+            ggplot2::scale_fill_gradient('Overdose Cases',
+                                         low = "#ffeda0",
+                                         high = "#f03b20")
+        )
+
       leaflet::leaflet() %>%
         # =================== #
         # ---- Map Tiles ----
@@ -412,6 +430,20 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
         lat2 = opioid_overdose_map_init_bounds$max_lat
       ) %>%
         leaflet::addMapPane("County_districts_polyline", zIndex = 420) %>%
+        # ================== #
+        # ---- Heat Map ----
+        # ================== #
+        leaflet::addRectangles(
+          data = heatmap_data,
+          group = "Heatmap",
+          lng1 = ~xmin, lng2 = ~xmax,
+          lat1 = ~ymin, lat2 = ~ymax,
+          color = ~fill,
+          dashArray = "3",
+          fillColor = ~fill,
+          fillOpacity = 0.75,
+          opacity = 0
+        ) %>%
         # ================================================ #
         # ---- Shapefile outline: FC School Districts ----
       # ================================================ #
@@ -562,7 +594,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
       ) %>%
         # ================= #
         # ---- Heatmap ----
-        # ================= #
+      # ================= #
       # TODO: Heatmap
       # leaflet.extras::addHeatmap(
       #   data = hyper_params$data_source,
@@ -571,8 +603,8 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
       #   blur = 20, max = 0.05, radius = 15
       # ) %>%
 
-        # ======================== #
-        # ---- Layers Control ----
+      # ======================== #
+      # ---- Layers Control ----
       # ======================== #
       leaflet::addLayersControl(
         position = "topright",
@@ -580,6 +612,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
         #
         # ),
         overlayGroups = c(
+          "Heatmap",
           "FC School Districts",
           "Fire Districts",
           "Census Tract",
