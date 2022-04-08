@@ -265,7 +265,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
         filtered_providers_id <-
           df  %>%
           tidyr::pivot_longer(
-            cols = opioidDashboard::filter_selection_treatment_providers_spec,
+            cols = as.character(opioidDashboard::filter_selection_treatment_providers_spec),
             names_to = "spec",
             values_to = "status"
           ) %>%
@@ -489,7 +489,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
         filtered_providers_id <-
           filtered_treatment_providers_data$data  %>%
           tidyr::pivot_longer(
-            cols = opioidDashboard::filter_selection_treatment_providers_spec,
+            cols = as.character(opioidDashboard::filter_selection_treatment_providers_spec),
             names_to = "spec",
             values_to = "status"
           ) %>%
