@@ -58,6 +58,7 @@ opioidOverdoseFiltersUI <- function(id) {
             }
           )
         ),
+        shiny::helpText("This widget does not work. It is for illustration only"),
         shiny::fluidRow(
           shiny::column(
             width = 4,
