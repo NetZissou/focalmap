@@ -8,7 +8,7 @@ filter_selection_treatment_providers_spec <-
     "Female Gender" ="gender_female",
     "Pregnancy Services" ="pregnancy",
     "Veteran Specific Services" ="veteran",
-    "Pirate Insurance" ="ins_private",
+    "Private Insurance" ="ins_private",
     "Medicaid/Medicare Insurance" ="ins_medicaid",
     "Self-Pay Insurance" ="ins_self",
     "Sliding Scale Insurance" = "ins_slide",
