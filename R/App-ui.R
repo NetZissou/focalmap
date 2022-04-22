@@ -3,8 +3,7 @@
 #' @return shiny ui
 #' @export
 ui <- function() {
-  # snapper::load_snapper(),
-  shiny::bootstrapPage(
+    shiny::bootstrapPage(
 
     snapper::load_snapper(),
     shinyjs::useShinyjs(),
