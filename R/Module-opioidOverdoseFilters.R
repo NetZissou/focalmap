@@ -1,6 +1,6 @@
 opioidOverdoseFiltersUI <- function(id) {
 
-  shinydashboardPlus::box(
+  shinydashboard::box(
     title = "Filters", solidHeader = TRUE, width = 12,
     collapsed = FALSE, collapsible = TRUE,
     id = shiny::NS(id, "filter_box"),
@@ -344,10 +344,10 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
     # Action button: toggle filter box
     shiny::observeEvent(input$collapse_filter_box, {
 
-      shinydashboardPlus::updateBox(
-        id = "filter_box",
-        action = "toggle"
-      )
+      # shinydashboardPlus::updateBox(
+      #   id = "filter_box",
+      #   action = "toggle"
+      # )
     })
 
     # Action button: reset all filters
