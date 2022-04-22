@@ -58,9 +58,13 @@ projectDAWNFilterServer <- function(id, od_data_all) {
 
       project_DAWN_data$naloxone_data <-
         naloxone_data_all %>%
+        # dplyr::filter(
+        #   .data$date > lubridate::ym(input$date_range[1]),
+        #   .data$date < lubridate::ym(input$date_range[2])
+        # )
         dplyr::filter(
-          .data$date > lubridate::ym(input$date_range[1]),
-          .data$date < lubridate::ym(input$date_range[2])
+          tsibble::yearmonth(.data$date) >= tsibble::yearmonth(input$date_range[1]),
+          tsibble::yearmonth(.data$date) <= tsibble::yearmonth(input$date_range[2]),
         )
 
       naloxone_date_max <-
