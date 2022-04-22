@@ -166,12 +166,53 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
       )
 
 
+    shiny::observe({
+
+      od_data_source <- input$od_data_source
+
+
+      if (od_data_source == "Raw Overdose Case Data") {
+        date_min <- min(od_data_all$date)
+        date_max <- max(od_data_all$date)
+      } else {
+        date_min <- min(filtered_overdose_data$data$date)
+        date_max <- max(filtered_overdose_data$data$date)
+      }
+
+
+      shinyWidgets::updateSliderTextInput(
+        session = session,
+        inputId = "date_range",
+        selected = purrr::map_chr(
+          .x = c(date_min, date_max),
+          .f = function(date) {
+            year <- lubridate::year(date)
+            month_num <- lubridate::month(date)
+            return(paste0(year, "-", month_num))
+          }
+        ),
+        choices = purrr::map_chr(
+          .x = seq(
+            from = date_min,
+            to = date_max,
+            by = "1 month"),
+          .f = function(date) {
+            year <- lubridate::year(date)
+            month_num <- lubridate::month(date)
+            return(paste0(year, "-", month_num))
+          }
+        )
+      )
+
+    })
+
     shiny::observeEvent(input$update_hyper_param, {
 
       # ===================================== #
       # ---- Handle overdose data source ----
       # ===================================== #
       od_data_source <- input$od_data_source
+
 
       data_min <- input$date_range[1]
       data_max <- input$date_range[2]

@@ -7,17 +7,17 @@
 #' @export
 server <- function(input, output, session) {
   # bslib::bs_themer()
-  personal_data <- personal_data()
-  kit_data <- kit_data()
-  naloxone_usage_data <- naloxone_usage_data()
-  program_data <- program_data()
+  # personal_data <- personal_data()
+  # kit_data <- kit_data()
+  # naloxone_usage_data <- naloxone_usage_data()
+  # program_data <- program_data()
 
-  kit_join_personal <-
-    kit_data %>%
-    dplyr::left_join(
-      personal_data,
-      by = "obs_key"
-    )
+  # kit_join_personal <-
+  #   kit_data %>%
+  #   dplyr::left_join(
+  #     personal_data,
+  #     by = "obs_key"
+  #   )
 
   od_data_all <- opioidDashboard::opioid_overdose_data()
   # naloxoneDistributionSeriesServer("kit_ts", kit_join_personal = kit_join_personal)
