@@ -1,5 +1,9 @@
 # opioidDashboard (development version)
 
+# Data Update:
+
+* (2022-07-08) opioid overdose event update, naloxone boxes update
+
 # opioidDashboard 0.1.0
 
 * Opioid overdose cases time series quick visualization
