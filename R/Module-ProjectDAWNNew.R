@@ -84,8 +84,8 @@ projectDAWNFilterServer <- function(id, od_data_all) {
       project_DAWN_data$overdose_data <-
         od_data_all %>%
         dplyr::filter(
-          .data$date >= naloxone_date_min,
-          .data$date <= naloxone_date_max
+          tsibble::yearmonth(.data$date) >= tsibble::yearmonth(naloxone_date_min),
+          tsibble::yearmonth(.data$date) <= tsibble::yearmonth(naloxone_date_max)
         )
     })
 
