@@ -1,6 +1,6 @@
 opioidOverdoseFiltersUI <- function(id) {
 
-  shinydashboardPlus::box(
+  shinydashboard::box(
     title = "Filters", solidHeader = TRUE, width = 12,
     collapsed = FALSE, collapsible = TRUE,
     id = shiny::NS(id, "filter_box"),
@@ -58,6 +58,7 @@ opioidOverdoseFiltersUI <- function(id) {
             }
           )
         ),
+        shiny::helpText("This widget does not work. It is for illustration only"),
         shiny::fluidRow(
           shiny::column(
             width = 4,
@@ -265,7 +266,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
         filtered_providers_id <-
           df  %>%
           tidyr::pivot_longer(
-            cols = opioidDashboard::filter_selection_treatment_providers_spec,
+            cols = as.character(opioidDashboard::filter_selection_treatment_providers_spec),
             names_to = "spec",
             values_to = "status"
           ) %>%
@@ -343,10 +344,10 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
     # Action button: toggle filter box
     shiny::observeEvent(input$collapse_filter_box, {
 
-      shinydashboardPlus::updateBox(
-        id = "filter_box",
-        action = "toggle"
-      )
+      # shinydashboardPlus::updateBox(
+      #   id = "filter_box",
+      #   action = "toggle"
+      # )
     })
 
     # Action button: reset all filters
@@ -489,7 +490,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
         filtered_providers_id <-
           filtered_treatment_providers_data$data  %>%
           tidyr::pivot_longer(
-            cols = opioidDashboard::filter_selection_treatment_providers_spec,
+            cols = as.character(opioidDashboard::filter_selection_treatment_providers_spec),
             names_to = "spec",
             values_to = "status"
           ) %>%

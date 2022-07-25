@@ -3,13 +3,13 @@
 #' @return shiny ui
 #' @export
 ui <- function() {
-  # snapper::load_snapper(),
-  shiny::bootstrapPage(
+    shiny::bootstrapPage(
 
     snapper::load_snapper(),
     shinyjs::useShinyjs(),
     shinyWidgets::useShinydashboard(),
-    shinyWidgets::useShinydashboardPlus(),
+    #shinyWidgets::useShinydashboardPlus(),
+
 
     theme = bslib::bs_theme(bootswatch = "materia", font_scale = 1.1),
     shiny::navbarPage(

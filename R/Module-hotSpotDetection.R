@@ -441,7 +441,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
           color = ~fill,
           dashArray = "3",
           fillColor = ~fill,
-          fillOpacity = 0.75,
+          fillOpacity = 0.40,
           opacity = 0
         ) %>%
         # ================================================ #

@@ -3,21 +3,21 @@
 # ================================= #
 filter_selection_treatment_providers_spec <-
   c(
-    "gender_all",
-    "gender_male",
-    "gender_female",
-    "pregnancy",
-    "veteran",
-    "ins_private",
-    "ins_medicaid",
-    "ins_self",
-    "ins_slide",
-    "ins_finance",
-    "ins_free",
-    "ins_insurance",
-    "ages_juveniles",
-    "ages_adults",
-    "ages_older_adults"
+    "Any Gender" ="gender_all",
+    "Male Gender" ="gender_male",
+    "Female Gender" ="gender_female",
+    "Pregnancy Services" ="pregnancy",
+    "Veteran Specific Services" ="veteran",
+    "Private Insurance" ="ins_private",
+    "Medicaid/Medicare Insurance" ="ins_medicaid",
+    "Self-Pay Insurance" ="ins_self",
+    "Sliding Scale Insurance" = "ins_slide",
+    "Finance Insurance" = "ins_finance",
+    "Free/No Charge" = "ins_free",
+    "Any Insurance" = "ins_insurance",
+    "Juvenile" = "ages_juveniles",
+    "Adults" = "ages_adults",
+    "Older Adults" = "ages_older_adults"
   )
 
 # ========================================= #

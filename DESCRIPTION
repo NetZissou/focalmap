@@ -55,7 +55,6 @@ Imports:
     shiny,
     shinyalert,
     shinydashboard,
-    shinydashboardPlus,
     shinyjs,
     shinyWidgets,
     snapper (>= 0.0.4),
