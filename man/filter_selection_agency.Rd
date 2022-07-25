@@ -5,7 +5,7 @@
 \alias{filter_selection_agency}
 \title{Filter selection for agency}
 \format{
-An object of class \code{character} of length 13.
+An object of class \code{character} of length 14.
 }
 \usage{
 filter_selection_agency
