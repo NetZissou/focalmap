@@ -5,7 +5,7 @@
 \alias{filter_selection_zip}
 \title{Filter selection for zip}
 \format{
-An object of class \code{character} of length 46.
+An object of class \code{character} of length 47.
 }
 \usage{
 filter_selection_zip
