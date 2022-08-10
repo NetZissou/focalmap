@@ -5,7 +5,7 @@
 \alias{filter_selection_destination}
 \title{Filter selection for destination}
 \format{
-An object of class \code{character} of length 25.
+An object of class \code{character} of length 30.
 }
 \usage{
 filter_selection_destination
