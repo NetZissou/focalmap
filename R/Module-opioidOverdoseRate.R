@@ -81,6 +81,32 @@ opioidOverdoseRateUI <- function(id) {
           outputId = shiny::NS(id, "od_case_rate_map")
         )
       )
+    ),
+
+    shiny::br(),
+
+    shiny::fluidRow(
+      shiny::column(
+        width = 3,
+        shiny::selectInput(
+          inputId = shiny::NS(id, "download_layer"),
+          label = "Specify layers to download",
+          choices = c(
+            "Zip Code" = "zip",
+            "FC School District" = "school_district",
+            "Census Tract" = "census_tract"
+          ),
+          selected = NULL
+        )
+      ),
+
+      shiny::column(
+        width = 3,
+        shiny::downloadButton(
+          outputId = shiny::NS(id, "download_case_rate"),
+          label = "Download Case Rate"
+        )
+      )
     )
   )
 }
@@ -553,6 +579,53 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
         )
       )
     })
+
+    output$download_case_rate <- shiny::downloadHandler(
+      filename = function() {
+        paste("case_rate_", input$download_layer, "_", Sys.Date(), ".csv", sep="")
+      },
+      content = function(file) {
+
+        switch (input$download_layer,
+          zip = {
+            case_rate_data <-
+              sf_map_data_list$zip$region_sf %>%
+              tibble::as_tibble() %>%
+              dplyr::select(
+                name = .data$GEOID,
+                population = .data$TOTAL_POP,
+                n = .data$n,
+                rate = .data$rate
+              )
+          },
+          school_district = {
+            case_rate_data <-
+              sf_map_data_list$school_district$region_sf %>%
+              tibble::as_tibble() %>%
+              dplyr::select(
+                name = .data$school_district,
+                population = .data$district_pop,
+                population_school = .data$district_school_pop,
+                population_proverty_children = .data$district_poverty_children_pop,
+                n = .data$n,
+                rate = .data$rate
+              )
+          },
+          census_tract = {
+            case_rate_data <-
+              sf_map_data_list$census_tract$region_sf %>%
+              tibble::as_tibble() %>%
+              dplyr::select(
+                name = .data$GEOID,
+                population = .data$TOTAL_POP,
+                n = .data$n,
+                rate = .data$rate
+              )
+          }
+        )
+        readr::write_csv(case_rate_data, file)
+      }
+    )
 
 
   })
