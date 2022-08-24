@@ -35,30 +35,30 @@ opioidOverdoseFiltersUI <- function(id) {
         ),
 
         shiny::h4("Temporal"),
-        shinyWidgets::sliderTextInput(
-          inputId = shiny::NS(id, "date_range_dummy"),
-          label = "Date Range",
-          choices = purrr::map_chr(
-            .x = seq(
-              from = as.Date("2008-01-01"),
-              to = Sys.Date(),
-              by = "1 month"),
-            .f = function(date) {
-              year <- lubridate::year(date)
-              month_num <- lubridate::month(date)
-              return(paste0(year, "-", month_num))
-            }
-          ),
-          selected = purrr::map_chr(
-            .x = c(as.Date("2008-01-01"), Sys.Date()),
-            .f = function(date) {
-              year <- lubridate::year(date)
-              month_num <- lubridate::month(date)
-              return(paste0(year, "-", month_num))
-            }
-          )
-        ),
-        shiny::helpText("This widget does not work. It is for illustration only"),
+        # shinyWidgets::sliderTextInput(
+        #   inputId = shiny::NS(id, "date_range_dummy"),
+        #   label = "Date Range",
+        #   choices = purrr::map_chr(
+        #     .x = seq(
+        #       from = as.Date("2008-01-01"),
+        #       to = Sys.Date(),
+        #       by = "1 month"),
+        #     .f = function(date) {
+        #       year <- lubridate::year(date)
+        #       month_num <- lubridate::month(date)
+        #       return(paste0(year, "-", month_num))
+        #     }
+        #   ),
+        #   selected = purrr::map_chr(
+        #     .x = c(as.Date("2008-01-01"), Sys.Date()),
+        #     .f = function(date) {
+        #       year <- lubridate::year(date)
+        #       month_num <- lubridate::month(date)
+        #       return(paste0(year, "-", month_num))
+        #     }
+        #   )
+        # ),
+        # shiny::helpText("This widget does not work. It is for illustration only"),
         shiny::fluidRow(
           shiny::column(
             width = 4,
@@ -225,6 +225,21 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
     # ---- Initialize source data ----
     # ================================ #
 
+    # Initialize Parameters
+    DATA_DATE_MIN <- min(od_data_all$date, na.rm = TRUE)
+    DATA_DATE_MAX <- max(od_data_all$date, na.rm = TRUE)
+
+    shiny::observeEvent(input$date_range, {
+
+      shiny::updateDateRangeInput(
+        inputId = "date_range",
+        min = as.character(DATA_DATE_MIN),
+        max = as.character(DATA_DATE_MAX),
+        start = as.character(DATA_DATE_MIN),
+        end = as.character(DATA_DATE_MAX)
+      )
+    }, ignoreInit = TRUE, once=TRUE)
+
     # Source data: opioid overdose data
     filtered_overdose_data <- shiny::reactiveValues(
       data = od_data_all
@@ -377,10 +392,10 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
       # clear temporal
       shiny::updateDateRangeInput(
         inputId = "date_range",
-        min = "2008-01-01",
-        max = "2021-07-17",
-        start = "2008-01-01",
-        end = "2021-07-17"
+        min = as.character(DATA_DATE_MIN),
+        max = as.character(DATA_DATE_MAX),
+        start = as.character(DATA_DATE_MIN),
+        end = as.character(DATA_DATE_MAX)
       )
 
     })
