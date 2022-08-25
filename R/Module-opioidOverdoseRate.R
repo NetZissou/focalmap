@@ -476,6 +476,11 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
           zoomControl = FALSE
         )
       ) %>%
+        leaflet::setView(
+          lat = 39.9612,
+          lng = -82.9988,
+          zoom = 10
+        ) %>%
         # =================== #
         # ---- Map Tiles ----
       # =================== #
@@ -484,12 +489,12 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
         # ========================= #
         # ---- Map init Bounds ----
       # ========================= #
-      leaflet::fitBounds(
-        lng1 = opioid_overdose_map_init_bounds$min_lng,
-        lat1 = opioid_overdose_map_init_bounds$min_lat,
-        lng2 = opioid_overdose_map_init_bounds$max_lng,
-        lat2 = opioid_overdose_map_init_bounds$max_lat
-      )  %>%
+      # leaflet::fitBounds(
+      #   lng1 = opioid_overdose_map_init_bounds$min_lng,
+      #   lat1 = opioid_overdose_map_init_bounds$min_lat,
+      #   lng2 = opioid_overdose_map_init_bounds$max_lng,
+      #   lat2 = opioid_overdose_map_init_bounds$max_lat
+      # )  %>%
         # =================== #
         # ---- Case Rate ----
       # ==================== #
