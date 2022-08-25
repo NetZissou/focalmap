@@ -167,17 +167,17 @@ opioidOverdoseFiltersUI <- function(id) {
         shiny::fluidRow(
 
           shiny::column(
-            width = 2,
+            width = 3,
             shiny::actionButton(shiny::NS(id, "apply_filters"), label = "Apply filters")
           ),
           shiny::column(
-            width = 2,
+            width = 3,
             shiny::actionButton(shiny::NS(id, "reset_filters"), label = "Reset filters")
-          ),
-          shiny::column(
-            width = 2,
-            shiny::actionButton(shiny::NS(id, "collapse_filter_box"), label = "Hide filters")
           )
+          # shiny::column(
+          #   width = 2,
+          #   shiny::actionButton(shiny::NS(id, "collapse_filter_box"), label = "Hide filters")
+          # )
         ),
 
         shiny::tags$br(),
@@ -357,13 +357,13 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
     # ================================ #
 
     # Action button: toggle filter box
-    shiny::observeEvent(input$collapse_filter_box, {
-
-      # shinydashboardPlus::updateBox(
-      #   id = "filter_box",
-      #   action = "toggle"
-      # )
-    })
+    # shiny::observeEvent(input$collapse_filter_box, {
+    #
+    #   # shinydashboardPlus::updateBox(
+    #   #   id = "filter_box",
+    #   #   action = "toggle"
+    #   # )
+    # })
 
     # Action button: reset all filters
     shiny::observeEvent(input$reset_filters,{
@@ -413,6 +413,13 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
     # =================== #
     # ---- Filtering ----
     # =================== #
+    filter_selection <- shiny::reactiveValues(
+      zip = NULL
+    )
+
+    shiny::observe({
+      filter_selection$zip <- input$zip
+    })
 
     shiny::observeEvent(input$apply_filters, {
 
@@ -465,7 +472,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
         filtered_overdose_data$data <-
           filtered_overdose_data$data %>%
           dplyr::filter(
-            .data$zip %in% as.numeric(input$zip)
+            as.character(.data$zip) %in% as.character(input$zip)
           )
       }
 
@@ -725,7 +732,8 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
       "od_map",
       filtered_overdose_data,
       filtered_drug_crime_data,
-      filtered_treatment_providers_data
+      filtered_treatment_providers_data,
+      filter_selection
     )
 
     return(
