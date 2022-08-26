@@ -1,114 +1,170 @@
 hotSpotDetectionUI <- function(id) {
-
   shiny::tagList(
-    # ============================ #
-    # ---- A. Hyperparameters ----
-    # ============================ #
+    shiny::div(
+      class = "hot_spot_map",
 
-    shiny::fluidRow(
+      # ==================== #
+      # ---- CCS Format ----
+      # ==================== #
+      shiny::tags$head(
+        shiny::tags$style(shiny::HTML(
+          "
+          div.hot_spot_map {
+            position: fixed;
+            top: 85px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            padding: 0;
+          }
 
-      # ============================== #
-      # ---- Overdose Source Data ----
-      # ============================== #
-      shiny::column(
-        width = 3,
-        shiny::selectInput(
-          inputId = shiny::NS(id, "od_data_source"),
-          label = "Choose overdose cases data source",
-          choices = c(
-            "Raw Overdose Case Data",
-            "Filtered Overdose Case Data"
+          #controlBox {
+            opacity: 0.95;
+          }
+
+          #businessTable {
+            opacity: 0.95;
+          }
+          "
+        ))
+      ),
+
+
+      # ============================================ #
+      # ---- Result: Hot Spot Map (Interactive) ----
+      # ============================================ #
+
+      leaflet::leafletOutput(
+        outputId = shiny::NS(id, "hot_spot_map"),
+        width="100%", height="100%"
+      ),
+
+      # ================== #
+      # ---- Controls ----
+      # ================== #
+
+      shiny::absolutePanel(
+        id = "controls",
+        fixed = TRUE,
+        draggable = TRUE,
+        top = 100, left = 20,
+        right = "auto", bottom = "auto",
+        width = 700, height = "auto",
+
+        shinydashboard::box(
+          id = "controlBox",
+          title = shiny::tagList(shiny::icon("gear"), "Control Panel"),
+          collapsible = TRUE, width = 12, solidHeader = TRUE,
+
+          shiny::fluidRow(
+
+            shiny::column(
+              width = 6,
+              # =========================== #
+              # ---- Param: Bin Width ----
+              # =========================== #
+
+              shiny::numericInput(
+                inputId = shiny::NS(id, "bin_width"),
+                label = "Bin Size",
+                min = 0,
+                value = 0.01,
+                step = 0.001
+              )
+            ),
+            shiny::column(
+              width = 6,
+              # ========================= #
+              # ---- Param: Quantile ----
+              # ========================= #
+              shiny::numericInput(
+                inputId = shiny::NS(id, "quantile"),
+                label = "Hot Spot Quantile",
+                min = 0,
+                max = 0.99,
+                value = 0.75,
+                step = 0.01
+              )
+            )
+
           ),
-          selected = NULL
+
+          shiny::fluidRow(
+            shiny::column(
+              width = 6,
+              # ===================================== #
+              # ---- Param: Overdose Data Source ----
+              # ===================================== #
+              shiny::selectInput(
+                inputId = shiny::NS(id, "od_data_source"),
+                label = "Choose overdose cases data source",
+                choices = c(
+                  "Raw Overdose Case Data",
+                  "Filtered Overdose Case Data"
+                ),
+                selected = NULL
+              )
+            ),
+
+            shiny::column(
+              width = 6,
+              # ======================= #
+              # ---- Param: Update ----
+              # ======================= #
+              shiny::actionButton(
+                inputId = shiny::NS(id, "update_hyper_param"),
+                label = "Update Hyperparameters"
+              )
+            )
+          )
+        ),
+
+        # ================================ #
+        # ---- Result: Business Table ----
+        # ================================ #
+
+        shinydashboard::box(
+          id = "businessTable", title = shiny::tagList(shiny::icon("building"), "Business"),
+          status = NULL, width = 12,
+          collapsible = TRUE, solidHeader = TRUE,
+          reactable::reactableOutput(
+            outputId = shiny::NS(id, "business_table")
+          )
         )
+
       ),
 
-      # ===================================== #
-      # ---- Algo Param: Bucket Bin Size ----
-      # ===================================== #
-      shiny::column(
-        width = 3,
-        shiny::numericInput(
-          inputId = shiny::NS(id, "bin_width"),
-          label = "Bin Size",
-          min = 0,
-          value = 0.01,
-          step = 0.001
-        )
-      ),
+      shiny::absolutePanel(
+        id = "overview",
+        fixed = TRUE,
+        draggable = FALSE,
+        top = "auto", left = "auto",
+        right = 20, bottom = 20,
+        width = 500, height = "auto",
 
-      # ======================================= #
-      # ---- Algo Param: Hot Spot Quantile ----
-      # ======================================= #
-      shiny::column(
-        width = 3,
-        shiny::numericInput(
-          inputId = shiny::NS(id, "quantile"),
-          label = "Hot Spot Quantile",
-          min = 0,
-          max = 0.99,
-          value = 0.75,
-          step = 0.01
-        )
-      ),
+        # ======================================= #
+        # ---- Result: Hot Spot Map (Static) ----
+        # ======================================= #
 
-      # ======================== #
-      # ---- Update Control ----
-      # ======================== #
-      shiny::column(
-        width = 3,
-        shiny::actionButton(
-          inputId = shiny::NS(id, "update_hyper_param"),
-          label = "Update Hyperparameters"
+        shinydashboard::box(
+          id = "hotSpotMapStatic", title = shiny::tagList(shiny::icon("map"), "Hot Spot Overview"),
+          status = NULL, width = 12,
+          collapsible = TRUE, solidHeader = TRUE,
+          shiny::plotOutput(
+            outputId = shiny::NS(id, "hot_spot_map_mini"),
+            height = "500px",
+            width = "100%"
+          )
         )
+
       )
-    ),
 
-    # ============================= #
-    # ---- B. Algorithm Result ----
-    # ============================= #
-
-    shiny::fluidRow(
-
-      # ================================= #
-      # ---- Hot Spot Map (Overview) ----
-      # ================================= #
-      shiny::column(
-        width = 4,
-        align="left",
-        shiny::plotOutput(
-          outputId = shiny::NS(id, "hot_spot_map_mini"),
-          height = "500px",
-          width = "100%"
-        )
-      ),
-
-      # =============================== #
-      # ---- Business Table Filter ----
-      # =============================== #
-      shiny::column(
-        width = 8,
-        reactable::reactableOutput(
-          outputId = shiny::NS(id, "business_table")
-        )
-      )
-    ),
-
-    # ======================================= #
-    # ---- C. Hot Spot Map (Interactive) ----
-    # ======================================= #
-
-    shiny::fluidRow(
-      shiny::column(
-        width = 12,
-        leaflet::leafletOutput(
-          outputId = shiny::NS(id, "hot_spot_map")
-        )
-      )
     )
-
   )
 }
+
+
 
 
 hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
@@ -263,7 +319,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
           )
         ) +
         ggplot2::theme_minimal() +
-        ggplot2::labs(x = "", y = "") +
+        ggplot2::labs(x = "", y = "", title = NULL) +
         ggplot2::theme(
           legend.position = "top",
           plot.margin = ggplot2::margin(0, 0, 0, 0, "cm"),
@@ -296,7 +352,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
             rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d")
           ),
           # Table Size
-          defaultPageSize = 8, minRows = 8
+          defaultPageSize = 5, minRows = 5
         )
     })
 
@@ -414,7 +470,16 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
                                          high = "#f03b20")
         )
 
-      leaflet::leaflet() %>%
+      leaflet::leaflet(
+        options = leaflet::leafletOptions(
+          zoomControl = FALSE
+        )
+      ) %>%
+        leaflet::setView(
+          lat = 39.9612,
+          lng = -82.9988,
+          zoom = 10
+        ) %>%
         # =================== #
         # ---- Map Tiles ----
       # =================== #
@@ -423,27 +488,27 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
         # ========================= #
         # ---- Map init Bounds ----
       # ========================= #
-      leaflet::fitBounds(
-        lng1 = opioid_overdose_map_init_bounds$min_lng,
-        lat1 = opioid_overdose_map_init_bounds$min_lat,
-        lng2 = opioid_overdose_map_init_bounds$max_lng,
-        lat2 = opioid_overdose_map_init_bounds$max_lat
-      ) %>%
-        leaflet::addMapPane("County_districts_polyline", zIndex = 420) %>%
+      # leaflet::fitBounds(
+      #   lng1 = opioid_overdose_map_init_bounds$min_lng,
+      #   lat1 = opioid_overdose_map_init_bounds$min_lat,
+      #   lng2 = opioid_overdose_map_init_bounds$max_lng,
+      #   lat2 = opioid_overdose_map_init_bounds$max_lat
+      # ) %>%
+      leaflet::addMapPane("County_districts_polyline", zIndex = 420) %>%
         # ================== #
         # ---- Heat Map ----
-        # ================== #
-        leaflet::addRectangles(
-          data = heatmap_data,
-          group = "Heatmap",
-          lng1 = ~xmin, lng2 = ~xmax,
-          lat1 = ~ymin, lat2 = ~ymax,
-          color = ~fill,
-          dashArray = "3",
-          fillColor = ~fill,
-          fillOpacity = 0.40,
-          opacity = 0
-        ) %>%
+      # ================== #
+      leaflet::addRectangles(
+        data = heatmap_data,
+        group = "Heatmap",
+        lng1 = ~xmin, lng2 = ~xmax,
+        lat1 = ~ymin, lat2 = ~ymax,
+        color = ~fill,
+        dashArray = "3",
+        fillColor = ~fill,
+        fillOpacity = 0.40,
+        opacity = 0
+      ) %>%
         # ================================================ #
         # ---- Shapefile outline: FC School Districts ----
       # ================================================ #
@@ -627,13 +692,13 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
             "Census Tract",
             "Zip Code"
           )
-        ) %>%
-        # --- Full Screen Control --- #
-        leaflet.extras::addFullscreenControl(
-          position = "topleft",
-          pseudoFullscreen = FALSE
-        ) %>%
-        leaflet.extras::addResetMapButton() # reset
+        )
+      # --- Full Screen Control --- #
+      # leaflet.extras::addFullscreenControl(
+      #   position = "topleft",
+      #   pseudoFullscreen = FALSE
+      # ) %>%
+      # leaflet.extras::addResetMapButton() # reset
     })
 
     # =============================== #
