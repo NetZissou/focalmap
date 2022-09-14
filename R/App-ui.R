@@ -66,6 +66,13 @@ ui <- function() {
       # ======================================== #
       shiny::tabPanel(title = "Case Rate Map",
                       opioidOverdoseRateUI("od_case_rate")
+      ),
+
+      # ============================================================= #
+      # ---- Tab: Application Development Information (DEV ONLY) ----
+      # ============================================================= #
+      shiny::tabPanel(title = "Dev",
+                      devInfoUI("dev_info")
       )
 
 

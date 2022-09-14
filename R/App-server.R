@@ -51,4 +51,6 @@ server <- function(input, output, session) {
     filtered_overdose_data = opioid_overdose_data_filtered,
     od_data_all = od_data_all
   )
+
+  devInfoServer("dev_info")
 }
