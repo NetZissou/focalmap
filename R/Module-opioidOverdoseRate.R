@@ -495,6 +495,7 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
       #   lng2 = opioid_overdose_map_init_bounds$max_lng,
       #   lat2 = opioid_overdose_map_init_bounds$max_lat
       # )  %>%
+
       # =================== #
       # ---- Case Rate ----
       # ==================== #

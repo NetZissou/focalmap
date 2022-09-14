@@ -6,7 +6,7 @@
 project_dawn_app_data <- function() {
 
   naloxone_data_all <-
-    vroom::vroom("/fs/ess/PDE0001/project_dawn/project_dawn_app_data.csv") %>%
+    vroom::vroom("/fs/ess/PDE0001/focal_data_ingestion/other/Naloxone/naloxone.csv") %>%
     dplyr::mutate(date = lubridate::ymd(.data$kit_distribution_date)) %>%
     dplyr::select(-.data$kit_distribution_date)
   return(naloxone_data_all)
