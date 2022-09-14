@@ -23,7 +23,7 @@ opioidOverdoseFiltersUI <- function(id) {
           shiny::column(
             width = 3,
             shiny::selectizeInput(
-              inputId = shiny::NS(id, "ethnicity"),
+              inputId = shiny::NS(id, "race"),
               label = "Race",
               multiple = TRUE,
               choices = c("", "White", "Black or African American", "Asian",
@@ -379,7 +379,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
 
 
       # clear demographics
-      demographic_inputs <- c("gender", "ethnicity")
+      demographic_inputs <- c("gender", "race")
       for (demographic_input in demographic_inputs) {
 
         shinyWidgets::updatePickerInput(
@@ -439,13 +439,13 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
           )
       }
 
-      # Filters: Ethnicity ====
-      if (!nothing_selected(input$ethnicity)) {
+      # Filters: race ====
+      if (!nothing_selected(input$race)) {
 
         filtered_overdose_data$data <-
           filtered_overdose_data$data %>%
           dplyr::filter(
-            .data$race %in% input$ethnicity
+            .data$race %in% input$race
           )
       }
 
