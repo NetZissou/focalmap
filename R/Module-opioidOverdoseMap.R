@@ -29,11 +29,12 @@ opioidOverdoseMapUI <- function(id) {
 
 opioidOverdoseMapServer <- function(
   id, filtered_overdose_data,
-  filtered_drug_crime_data, filtered_treatment_providers_data
+  filtered_drug_crime_data, filtered_treatment_providers_data, filter_selection
 ) {
   shiny::req(shiny::is.reactivevalues(filtered_overdose_data))
   shiny::req(shiny::is.reactivevalues(filtered_drug_crime_data))
   shiny::req(shiny::is.reactivevalues(filtered_treatment_providers_data))
+  shiny::req(shiny::is.reactivevalues(filter_selection))
 
   shiny::moduleServer(id, function(input, output, session){
 
@@ -278,6 +279,94 @@ opioidOverdoseMapServer <- function(
         ) %>%
         leaflet.extras::addResetMapButton() # reset
 
+    })
+
+    # =================================================== #
+    # ---- Update: Highligh selected zip code region ----
+    # =================================================== #
+    shiny::observe({
+      selected_zip <- filter_selection$zip
+      if (!is.null(selected_zip)) {
+        leaflet::leafletProxy("overdose_map") %>%
+          leaflet::clearGroup(group = "Zip Code") %>%
+          leaflet::addPolygons(
+            data = zipcode_sf %>%
+              dplyr::mutate(
+                color = ifelse(.data$GEOID %in% selected_zip, "orange", "#555555")
+              ),
+            group = "Zip Code",
+            stroke = TRUE,
+            color = ~color,
+            weight = 1,
+            opacity = 0.8,
+            dashArray = "3",
+            fillOpacity = 0.1,
+            options = leaflet::pathOptions(pane = "County_districts_polyline"),
+
+            label = ~ paste0(
+              "<b>", GEOID, "</b>"
+            ) %>% lapply(htmltools::HTML),
+
+            labelOptions = leaflet::labelOptions(
+              style = list(
+                "font-weight" = "normal",
+                padding = "3px 8px"
+              ),
+              textsize = "15px",
+              direction = "auto"
+            ),
+
+            highlight = leaflet::highlightOptions(
+              weight = 3,
+              fillOpacity = 0.1,
+              color = "black",
+              dashArray = "",
+              opacity = 0.5,
+              bringToFront = TRUE,
+              sendToBack = TRUE
+            )
+          )
+      } else {
+        leaflet::leafletProxy("overdose_map") %>%
+          leaflet::clearGroup(group = "Zip Code") %>%
+          leaflet::addPolygons(
+            data = zipcode_sf %>%
+              dplyr::mutate(
+                color =  "#555555"
+              ),
+            group = "Zip Code",
+            stroke = TRUE,
+            color = ~color,
+            weight = 1,
+            opacity = 0.8,
+            dashArray = "3",
+            fillOpacity = 0.1,
+            options = leaflet::pathOptions(pane = "County_districts_polyline"),
+
+            label = ~ paste0(
+              "<b>", GEOID, "</b>"
+            ) %>% lapply(htmltools::HTML),
+
+            labelOptions = leaflet::labelOptions(
+              style = list(
+                "font-weight" = "normal",
+                padding = "3px 8px"
+              ),
+              textsize = "15px",
+              direction = "auto"
+            ),
+
+            highlight = leaflet::highlightOptions(
+              weight = 3,
+              fillOpacity = 0.1,
+              color = "black",
+              dashArray = "",
+              opacity = 0.5,
+              bringToFront = TRUE,
+              sendToBack = TRUE
+            )
+          )
+      }
     })
 
     # ============================================= #

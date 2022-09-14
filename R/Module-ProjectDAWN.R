@@ -108,11 +108,11 @@ projectDAWNTimeSeriesUI  <- function(id) {
           label = "Group by",
           choices = c(
             "None" = "none",
-            "Age group" = "age",
-            "Ethnicity group" = "ethnicity",
-            "Assigned Sex" = "birth_sex",
-            "Program" = "program_cat",
-            "Reason" = "reason"
+            "Age group" = "age_cat",
+            "Ethnicity group" = "race",
+            "Assigned Sex" = "sex",
+            "Program" = "program_top",
+            "Reason" = "usage_reason"
           )
         )
       )
@@ -145,9 +145,9 @@ projectDAWNTimeSeriesServer <- function(id, project_DAWN_data) {
 
         case_od_group <- function(x) {
           dplyr::case_when(
-            x == "birth_sex" ~ "sex",
-            x == "ethnicity" ~ "race",
-            x == "age" ~ "age_cat",
+            x == "sex" ~ "sex",
+            x == "race" ~ "race",
+            x == "age_cat" ~ "age_cat",
             TRUE ~ "none"
           )
         }
@@ -176,6 +176,7 @@ projectDAWNTimeSeriesServer <- function(id, project_DAWN_data) {
               date = as.Date(.data$date)
             )
         } else {
+
           ts_data <-
             project_DAWN_data$overdose_data %>%
             dplyr::mutate(
@@ -269,7 +270,7 @@ projectDAWNTimeSeriesServer <- function(id, project_DAWN_data) {
               dplyr::across(.cols = groups)
             ) %>%
             dplyr::summarise_at(
-              dplyr::vars(.data$kit_number), .f = list(n = ~sum(.x, na.rm = TRUE))) %>%
+              dplyr::vars(.data$kit_amount), .f = list(n = ~sum(.x, na.rm = TRUE))) %>%
             #stats::na.omit() %>%
             tsibble::as_tsibble(index = .data$date, key =.data[[groups[-1]]]) %>%
             tsibble::group_by_key() %>%
@@ -288,7 +289,7 @@ projectDAWNTimeSeriesServer <- function(id, project_DAWN_data) {
               dplyr::across(.cols = groups)
             ) %>%
             dplyr::summarise_at(
-              dplyr::vars(.data$kit_number), .f = list(n = ~sum(.x, na.rm = TRUE))) %>%
+              dplyr::vars(.data$kit_amount), .f = list(n = ~sum(.x, na.rm = TRUE))) %>%
             stats::na.omit() %>%
             tsibble::as_tsibble(index = .data$date) %>%
             tsibble::fill_gaps(n = 0) %>%
