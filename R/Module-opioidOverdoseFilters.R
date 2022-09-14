@@ -23,7 +23,7 @@ opioidOverdoseFiltersUI <- function(id) {
           shiny::column(
             width = 3,
             shiny::selectizeInput(
-              inputId = shiny::NS(id, "ethnicity"),
+              inputId = shiny::NS(id, "race"),
               label = "Race",
               multiple = TRUE,
               choices = c("", "White", "Black or African American", "Asian",
@@ -364,7 +364,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
 
 
       # clear demographics
-      demographic_inputs <- c("gender", "ethnicity")
+      demographic_inputs <- c("gender", "race")
       for (demographic_input in demographic_inputs) {
 
         shinyWidgets::updatePickerInput(
@@ -377,10 +377,10 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
       # clear temporal
       shiny::updateDateRangeInput(
         inputId = "date_range",
-        min = "2008-01-01",
-        max = "2021-07-17",
-        start = "2008-01-01",
-        end = "2021-07-17"
+        min = min(od_data_all$date, na.rm = T),
+        max = max(od_data_all$date, na.rm = T),
+        start = min(od_data_all$date, na.rm = T),
+        end = max(od_data_all$date, na.rm = T)
       )
 
     })
@@ -417,13 +417,13 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
           )
       }
 
-      # Filters: Ethnicity ====
-      if (!nothing_selected(input$ethnicity)) {
+      # Filters: race ====
+      if (!nothing_selected(input$race)) {
 
         filtered_overdose_data$data <-
           filtered_overdose_data$data %>%
           dplyr::filter(
-            .data$race %in% input$ethnicity
+            .data$race %in% input$race
           )
       }
 
@@ -450,7 +450,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
         filtered_overdose_data$data <-
           filtered_overdose_data$data %>%
           dplyr::filter(
-            .data$zip %in% as.numeric(input$zip)
+            as.character(.data$zip) %in% as.character(input$zip)
           )
       }
 
