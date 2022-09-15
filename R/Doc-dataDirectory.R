@@ -14,3 +14,12 @@
 
 #' Ohio business information
 "OHIO_BUSINESS_DATA_DIRECTORY"
+
+#' The root directory of FOCAL data ingestion pipeline
+"ROOT_PATH"
+
+#' primary table schema used for data loading
+"schema_primary"
+
+#' naloxone schema used for data loading
+"schema_naloxone"
