@@ -3,6 +3,7 @@
 export("%>%")
 export(app)
 export(check_files_update_time)
+export(data_drug_crime)
 export(data_opioid_overdose)
 export(drug_crime_data)
 export(get_EMS_sf)
