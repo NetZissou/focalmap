@@ -39,5 +39,6 @@ server <- function(input, output, session) {
     od_data_all = od_data_all
   )
 
-  devInfoServer("dev_info")
+  devInfoServer("dev_info", parent_session = session)
+
 }
