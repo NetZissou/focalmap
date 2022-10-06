@@ -31,7 +31,12 @@ treatment_providers_data <- function(
     dplyr::mutate(
       gender_all = (.data$gender == "all"),
       gender_female = (.data$gender == "female"),
-      gender_male = (.data$gender == "male")
+      gender_male = (.data$gender == "male"),
+      website = ifelse(
+        stringr::str_detect(.data$website, "http"),
+        .data$website,
+        paste0("https://", .data$website)
+      )
     )
 
   # ================================== #

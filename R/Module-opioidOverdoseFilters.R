@@ -246,7 +246,7 @@ opioidOverdoseFiltersServer <- function(id, od_data_all) {
     )
 
     # Source data: drug crime data
-    drug_crime_data_all <- opioidDashboard::drug_crime_data()
+    drug_crime_data_all <- opioidDashboard::data_drug_crime()
     filtered_drug_crime_data <- shiny::reactiveValues(
       data = drug_crime_data_all
     )
