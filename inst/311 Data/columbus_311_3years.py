@@ -11,13 +11,15 @@ from datetime import date
 
 params = {
     "where": "1=1",      # Download all records.  Do not filter by attribute.
-    "outFields": "STATUS, SHAPE, OBJECTID, STATUS_DATE, DEPARTMENT_NAME, DIVISION_NAME, SECTION_NAME, DATAHUB_ID, CASE_ID, REPORTED_DATE, REQUEST_CATEGORY, REQUEST_SUBCATEGORY, REQUEST_TYPE, TEAM_NAME, STREET, CITY, ZIP, COLUMBUSCOMMUNITY, AREACOMMISSION, COUNCILDISTRICT, C1PRIORITYAREA, ZIPCODE, LOCATION_ID, LATITUDE, LONGITUDE, REQUEST_MODIFIED",    # Retrieve a subset of the attributes
+    "outFields": "*",
     "f":"geojson"        # Download in GeoJSON format (other formats are probably not useful)
 }    
 
 baseUrl = "http://maps2.columbus.gov/arcgis/rest/services/Applications/ServiceRequests/MapServer/1/query"
 
-r = requests.get(url=baseUrl, params=params)
+url = "https://maps2.columbus.gov/arcgis/rest/services/Applications/ServiceRequests/MapServer/1/query?where=1%3D1&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=pjson"
+
+r = requests.get(url=url, params=params)
 data = r.json()
 
 file_dir = "/fs/ess/PDE0001/311/Columbus/API_result/"
