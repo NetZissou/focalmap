@@ -41,6 +41,7 @@ RUN groupadd -g 2925 PZS0523 && \
     usermod -aG PDE0001 focalmapdev
 
 # build all the dependencies before you copy the app to cache these layers
+RUN Rscript -e "install.packages('pkgdown')"
 RUN Rscript -e "install.packages('devtools')"
 RUN mkdir /tmp/build
 COPY opioidDashboard.Rproj /tmp/build
