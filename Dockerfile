@@ -14,6 +14,7 @@ RUN dnf install -y \
         gcc gcc-c++ gcc-gfortran gdb make curl curl-devel openssl-devel libxml2-devel libjpeg-turbo-devel \
         udunits2-devel cairo-devel proj-devel sqlite-devel geos-devel gdal gdal-devel \
         readline-devel libXt-devel java-11-openjdk-devel doxygen doxygen-latex texlive \
+        freetype-devel libpng-devel libtiff-devel \
     && dnf clean all && rm -rf /var/cache/dnf/*
 
 RUN curl -o R.tar.gz https://cran.r-project.org/src/base/R-4/R-${R_BASE_VERSION}.tar.gz \
@@ -41,7 +42,6 @@ RUN groupadd -g 2925 PZS0523 && \
     usermod -aG PDE0001 focalmapdev
 
 # build all the dependencies before you copy the app to cache these layers
-RUN Rscript -e "install.packages('pkgdown')"
 RUN Rscript -e "install.packages('devtools')"
 RUN mkdir /tmp/build
 COPY opioidDashboard.Rproj /tmp/build
