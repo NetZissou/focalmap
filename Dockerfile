@@ -4,6 +4,7 @@ LABEL maintainer 'Jeff Ohrstrom <johrstrom@osc.edu>'
 ENV R_BASE_VERSION 4.0.3
 ENV CRAN https://cran.case.edu/
 
+RUN dnf update -y ca-certificates
 RUN dnf update -y && dnf clean all && rm -rf /var/cache/dnf/*
 RUN dnf install -y \
         dnf-utils \
