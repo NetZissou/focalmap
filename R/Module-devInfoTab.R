@@ -1,7 +1,34 @@
 devInfoUI <- function(id) {
   shiny::tagList(
+
+    # =================== #
+    # ---- Dev Cycle ----
+    # =================== #
     shiny::h1("Development Cycle"),
     highcharter::highchartOutput(shiny::NS(id, "dev_cycle")),
+
+
+
+    # ==================== #
+    # ---- User Table ----
+    # ==================== #
+    shiny::h1("User Table"),
+    reactable::reactableOutput(
+      shiny::NS(id, "user_table")
+    ),
+
+    # ========================= #
+    # ---- Data Dictionary ----
+    # ========================= #
+    shiny::h1("FOCAL Data Dictionary"),
+    reactable::reactableOutput(
+      shiny::NS(id, "data_dictionary")
+    ),
+
+
+    # ========================= #
+    # ---- Testing Utility ----
+    # ========================= #
 
     shiny::h1("Tab Direction"),
 
@@ -48,6 +75,74 @@ devInfoServer <- function(id, parent_session) {
         "sankey",
         name = "Dev Cycle"
       )
+    })
+
+    # ==================== #
+    # ---- User Table ----
+    # ==================== #
+    output$user_table <- reactable::renderReactable({
+      opioidDashboard::FOCAL_USER_TABLE %>%
+        purrr::set_names(
+          stringr::str_to_title(names(opioidDashboard::FOCAL_USER_TABLE))
+        ) %>%
+        reactable::reactable(
+          # Table Format
+          filterable = TRUE,
+          outlined = TRUE,
+          fullWidth = TRUE,
+          #defaultColDef = reactable::colDef(minWidth = 50),
+          #height = 400,
+          #bordered = TRUE,
+          # Selection
+          #selection = "multiple", onClick = "select",
+          highlight = TRUE,
+          theme = reactable::reactableTheme(
+            rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d")
+          ),
+
+          columns = list(
+            Duo = reactable::colDef(cell = function(value) {
+              # Render as an X mark or check mark
+              if (!value) "\u274c No" else "\u2714\ufe0f Yes"
+            }),
+
+            Onboard = reactable::colDef(cell = function(value) {
+              # Render as an X mark or check mark
+              if (!value) "\u274c No" else "\u2714\ufe0f Yes"
+            })
+          ),
+          groupBy = "Agency"
+        )
+    })
+
+    # =============================== #
+    # ---- FOCAL Data Dictionary ----
+    # =============================== #
+    output$data_dictionary <- reactable::renderReactable({
+      opioidDashboard::FOCAL_DATA_DICTIONARY %>%
+        purrr::set_names(
+          stringr::str_to_title(
+            stringr::str_replace(
+              names(opioidDashboard::FOCAL_DATA_DICTIONARY),
+              "_", " "
+            )
+          )
+        ) %>%
+        reactable::reactable(
+          # Table Format
+          filterable = TRUE,
+          outlined = TRUE,
+          fullWidth = TRUE,
+          #defaultColDef = reactable::colDef(minWidth = 50),
+          #height = 400,
+          #bordered = TRUE,
+          # Selection
+          #selection = "multiple", onClick = "select",
+          highlight = TRUE,
+          theme = reactable::reactableTheme(
+            rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d")
+          )
+        )
     })
 
     # ====================== #

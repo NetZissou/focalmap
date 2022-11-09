@@ -15,6 +15,12 @@
 #' Ohio business information
 "OHIO_BUSINESS_DATA_DIRECTORY"
 
+#' FOCAL USER TABLE
+"FOCAL_USER_TABLE"
+
+#' FOCAL DATA DICTIONARY
+"FOCAL_DATA_DICTIONARY"
+
 #' The root directory of FOCAL data ingestion pipeline
 "ROOT_PATH"
 
