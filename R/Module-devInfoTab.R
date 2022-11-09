@@ -1,13 +1,34 @@
 devInfoUI <- function(id) {
   shiny::tagList(
+
+    # =================== #
+    # ---- Dev Cycle ----
+    # =================== #
     shiny::h1("Development Cycle"),
     highcharter::highchartOutput(shiny::NS(id, "dev_cycle")),
 
 
+
+    # ==================== #
+    # ---- User Table ----
+    # ==================== #
     shiny::h1("User Table"),
     reactable::reactableOutput(
       shiny::NS(id, "user_table")
     ),
+
+    # ========================= #
+    # ---- Data Dictionary ----
+    # ========================= #
+    shiny::h1("FOCAL Data Dictionary"),
+    reactable::reactableOutput(
+      shiny::NS(id, "data_dictionary")
+    ),
+
+
+    # ========================= #
+    # ---- Testing Utility ----
+    # ========================= #
 
     shiny::h1("Tab Direction"),
 
@@ -91,6 +112,36 @@ devInfoServer <- function(id, parent_session) {
             })
           ),
           groupBy = "Agency"
+        )
+    })
+
+    # =============================== #
+    # ---- FOCAL Data Dictionary ----
+    # =============================== #
+    output$data_dictionary <- reactable::renderReactable({
+      opioidDashboard::FOCAL_DATA_DICTIONARY %>%
+        purrr::set_names(
+          stringr::str_to_title(
+            stringr::str_replace(
+              names(opioidDashboard::FOCAL_DATA_DICTIONARY),
+              "_", " "
+            )
+          )
+        ) %>%
+        reactable::reactable(
+          # Table Format
+          filterable = TRUE,
+          outlined = TRUE,
+          fullWidth = TRUE,
+          #defaultColDef = reactable::colDef(minWidth = 50),
+          #height = 400,
+          #bordered = TRUE,
+          # Selection
+          #selection = "multiple", onClick = "select",
+          highlight = TRUE,
+          theme = reactable::reactableTheme(
+            rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d")
+          )
         )
     })
 
