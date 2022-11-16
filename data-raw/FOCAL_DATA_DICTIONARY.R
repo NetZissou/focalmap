@@ -11,10 +11,24 @@
 #   availability = ,
 #   update_frequency = "",
 #   use_case = "",
+#   attributes = "",
 #   comment = "",
 #   file_location = ""
 # )
 
+
+get_attr_html <- function(col_names) {
+
+  col_names <-
+    stringr::str_to_title(
+      stringr::str_replace(col_names, "_", " ")
+    )
+  lists <- purrr::map_chr(col_names, ~as.character(shiny::tags$li(.x)))
+  paste(
+    c("<ul>", lists, "</ul>"),
+    collapse = ""
+  )
+}
 
 
 FOCAL_DATA_DICTIONARY <-
@@ -31,6 +45,16 @@ FOCAL_DATA_DICTIONARY <-
       availability = c("2019-01", "2022-06"),
       update_frequency = "yearly",
       use_case = "",
+      attributes = opioidDashboard::data_drug_crime() %>%
+        dplyr::select(1:9) %>%
+        head(0) %>%
+        dplyr::mutate(
+          school_district = character(),
+          census_tract = character(),
+          EMS = character()
+        ) %>%
+        names() %>%
+        get_attr_html(),
       comment = "Perform addtional geocoding phase to calculate case rate for zip code, EMS district, and school district",
       file_location = fs::path(
         FOCALPipe::ROOT_PATH,
@@ -49,6 +73,19 @@ FOCAL_DATA_DICTIONARY <-
       availability = c("available"),
       update_frequency = "whenever",
       use_case = "",
+      attributes = get_attr_html(
+        c(
+          "name",
+          "social_media_links",
+          "website",
+          "street_address",
+          "city",
+          "state",
+          "zip_code",
+          "telephone",
+          "description (containing hours and special instructions)"
+        )
+      ),
       comment = "",
       file_location = fs::path(
         FOCALPipe::ROOT_PATH,
@@ -68,6 +105,23 @@ FOCAL_DATA_DICTIONARY <-
       availability = c("available"),
       update_frequency = "whenever",
       use_case = "",
+      attributes = get_attr_html(
+        c(
+          "name",
+          "Medical School",
+          "Graduation Year",
+          "Primary Specialty",
+          "Secondary Specialty",
+          "Organization Legal Name",
+          "Number of Group Members",
+          "Address",
+          "City",
+          "State",
+          "Zip",
+          "Hospital Affiliations",
+          "Phone Number"
+        )
+      ),
       comment = "Explore other type of diease treatments.",
       file_location = fs::path(
         FOCALPipe::ROOT_PATH,
@@ -86,6 +140,7 @@ FOCAL_DATA_DICTIONARY <-
       availability = c("available"),
       update_frequency = "whenever",
       use_case = "",
+      attributes = "Same as Columbus Doctors and Clinicians dataset",
       comment = "One doctor could have multiple work locations. Treatment locations would stack together on map because they usually nested within one institution.",
       file_location = fs::path(
         FOCALPipe::ROOT_PATH,
@@ -107,6 +162,20 @@ FOCAL_DATA_DICTIONARY <-
       update_frequency = "",
       use_case = "",
       comment = "",
+      attributes = get_attr_html(c(
+        "service_name",
+        "service_id",
+        "street_address",
+        "city",
+        "country",
+        "state",
+        "zipcode",
+        "lat",
+        "lng",
+        "telephone",
+        "website",
+        "language"
+      )),
       file_location = fs::path(
         FOCALPipe::ROOT_PATH,
         "other",
@@ -125,6 +194,9 @@ FOCAL_DATA_DICTIONARY <-
       availability = c("2020-02", "2022-10"),
       update_frequency = "monthly",
       use_case = "",
+      attributes = get_attr_html(c(
+        opioidDashboard::project_dawn_app_data() %>% names()
+      )),
       comment = "The latest 30 to 60 days naloxone distribution data is preliminary. ",
       file_location = fs::path(
         FOCALPipe::ROOT_PATH,
@@ -145,6 +217,7 @@ FOCAL_DATA_DICTIONARY <-
       availability =  c("available"),
       update_frequency = "unknown",
       use_case = "hot-spot detection",
+      attributes = "",
       comment = paste0(
         "Hasn't been updated in a while. Some business locations might need to be updated. ", "\n",
         stringr::str_c(stringr::str_to_title(opioidDashboard::ELIGIBLE_BUSINESS_TYPE), collapse = "; ")
@@ -169,6 +242,7 @@ FOCAL_DATA_DICTIONARY <-
       availability = c("available"),
       update_frequency = "whenever",
       use_case = "",
+      attributes = "",
       comment = "Treatment providers filter need to be improved; grand category; key words; new hierarchy",
       file_location = fs::path(
         FOCALPipe::ROOT_PATH,
@@ -189,6 +263,15 @@ FOCAL_DATA_DICTIONARY <-
       availability = c("2019-01", "2022-02"),
       update_frequency = "unknown",
       use_case = "",
+      attributes = get_attr_html(c(
+        "date",
+        "request_id",
+        "request_type",
+        "lat", "lng",
+        "school_district",
+        "zip",
+        "EMS"
+      )),
       comment = "",
       file_location = ""
     ),
@@ -202,6 +285,7 @@ FOCAL_DATA_DICTIONARY <-
       availability = c("2008-01", "2022-05"),
       update_frequency = "monthly",
       use_case = "",
+      attributes = "",
       comment = "Complete the columbus 311 data ingesting pipeline; Construct unique identifier. ",
       file_location = ""
     )
@@ -218,6 +302,7 @@ FOCAL_DATA_DICTIONARY <-
         availability = list(metadata$availability),
         update_frequency = metadata$update_frequency,
         use_case = metadata$use_case,
+        attributes = metadata$attributes,
         comment = metadata$comment,
         file_location = metadata$file_location
       )

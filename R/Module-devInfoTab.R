@@ -119,6 +119,9 @@ devInfoServer <- function(id, parent_session) {
     # ---- FOCAL Data Dictionary ----
     # =============================== #
     output$data_dictionary <- reactable::renderReactable({
+
+      attr_info <- opioidDashboard::FOCAL_DATA_DICTIONARY$attributes
+
       opioidDashboard::FOCAL_DATA_DICTIONARY %>%
         purrr::set_names(
           stringr::str_to_title(
@@ -128,6 +131,7 @@ devInfoServer <- function(id, parent_session) {
             )
           )
         ) %>%
+        dplyr::select(-.data$Attributes) %>%
         reactable::reactable(
           # Table Format
           filterable = TRUE,
@@ -141,7 +145,32 @@ devInfoServer <- function(id, parent_session) {
           highlight = TRUE,
           theme = reactable::reactableTheme(
             rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d")
+          ),
+
+          # columns = list(
+          #   Attributes = reactable::colDef(
+          #     html = TRUE
+          #   )
+          # )
+
+          details = reactable::colDef(
+            name = "",
+            details = function(index){
+              attr_info[index]
+            },
+            html = TRUE,
+            width = 80
           )
+          # details = function(index) {
+          #   #print(attr_info[index])
+          #   print(index)
+          #   print(attr_info)
+          #   htmltools::div(
+          #     "Details for row: ", index,
+          #     htmltools::tags$pre(paste(capture.output(attr_info[index]), collapse = "\n"))
+          #   )
+          # }
+
         )
     })
 
