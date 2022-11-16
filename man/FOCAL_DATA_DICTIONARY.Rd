@@ -5,7 +5,7 @@
 \alias{FOCAL_DATA_DICTIONARY}
 \title{FOCAL DATA DICTIONARY}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 10 rows and 10 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 10 rows and 11 columns.
 }
 \usage{
 FOCAL_DATA_DICTIONARY
