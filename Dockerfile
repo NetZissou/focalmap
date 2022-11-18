@@ -48,6 +48,7 @@ RUN mkdir /tmp/build
 COPY opioidDashboard.Rproj /tmp/build
 COPY DESCRIPTION /tmp/build
 RUN cd /tmp/build; Rscript -e "library ('devtools'); install()"
+RUN chmod 1777 /tmp
 
 COPY . /app
 WORKDIR /app
