@@ -3,7 +3,7 @@
 #' @return shiny ui
 #' @export
 ui <- function() {
-    shiny::bootstrapPage(
+  shiny::bootstrapPage(
 
     snapper::load_snapper(),
     shinyjs::useShinyjs(),
@@ -14,14 +14,15 @@ ui <- function() {
     theme = bslib::bs_theme(bootswatch = "materia", font_scale = 1.1),
     shiny::navbarPage(
       title = "FOCAL MAP SECURED",
-      selected = "Opioid Overdose Map", id = "navbar",
+      selected = "tab_data_filters", id = "navbar",
 
       #theme = bslib::bs_theme(bootswatch = "materia", font_scale = 1.1),
 
       # ================================== #
       # ---- Tab: Opioid Overdose Map ----
       # ================================== #
-      shiny::tabPanel(title = "Opioid Overdose Map",
+      shiny::tabPanel(value = "tab_data_filters",
+                      title = "Data Filters",
 
                       shiny::fluidRow(
 
@@ -45,7 +46,8 @@ ui <- function() {
       #                 )
       # ),
 
-      shiny::tabPanel(title = "Project DAWN",
+      shiny::tabPanel(value = "tab_project_dawn",
+                      title = "Project DAWN",
                       shiny::fluidRow(
                         projectDAWNFilterUI("naloxone_filter")
                       ),
@@ -57,17 +59,26 @@ ui <- function() {
       # ================================= #
       # ---- Tab: Hot Spot Detection ----
       # ================================= #
-      shiny::tabPanel(title = "Hot Spot Detection",
+      shiny::tabPanel(value = "tab_hot_spot_detection",
+                      title = "Hot Spot Detection",
                       hotSpotDetectionUI("hot_spot")
       ),
 
       # ======================================== #
       # ---- Tab: Opioid Overdose Case Rate ----
       # ======================================== #
-      shiny::tabPanel(title = "Case Rate Map",
+      shiny::tabPanel(value = "tab_case_rate_map",
+                      title = "Case Rate Map",
                       opioidOverdoseRateUI("od_case_rate")
-      )
+      ),
 
+      # ============================================================= #
+      # ---- Tab: Application Development Information (DEV ONLY) ----
+      # ============================================================= #
+      shiny::tabPanel(value = "tab_dev",
+                      title = "Dev",
+                      devInfoUI("dev_info")
+      )
 
     )
   )
