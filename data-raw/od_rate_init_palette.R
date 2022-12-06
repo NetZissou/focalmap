@@ -1,6 +1,6 @@
 overdose_case_rate_palette <- "YlOrRd"
 
-od_data_all <- opioidDashboard::opioid_overdose_data()
+od_data_all <- opioidDashboard::data_opioid_overdose()
 zip_region_sf <- get_region_od_rate(
   "zip",
   get_zipcode_sf(),
