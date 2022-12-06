@@ -75,10 +75,10 @@ ui <- function() {
       # ============================================================= #
       # ---- Tab: Application Development Information (DEV ONLY) ----
       # ============================================================= #
-      # shiny::tabPanel(value = "tab_dev",
-      #                 title = "Dev",
-      #                 devInfoUI("dev_info")
-      # )
+      shiny::tabPanel(value = "tab_dev",
+                      title = "Dev",
+                      devInfoUI("dev_info")
+      )
 
     )
   )
