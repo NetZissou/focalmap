@@ -1,6 +1,7 @@
 # opioidDashboard (development version)
 
 # Data Update:
+* (2022-11-31) opioid overdose data update; project dawn naloxone boxes update
 * (2022-10-31) opioid overdose data update; project dawn naloxone boxes update
 * (2022-09-26) project dawn naloxone boxes update
 * (2022-08-23) Remove duplicate records from primary table
