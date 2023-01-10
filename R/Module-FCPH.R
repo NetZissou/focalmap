@@ -48,199 +48,217 @@ fcphUI <- function(id) {
         right = "auto", bottom = "auto",
         width = 700, height = "auto",
 
-        # ================================== #
-        # ---- Box: Base Layer Controls ----
-        # ================================== #
-
         shinydashboard::box(
           id = "controlBox",
-          title = shiny::tagList(shiny::icon("gear"), "Base Layer Controls"),
+          title = shiny::tagList(shiny::icon("gear"), "Toolkit"),
           collapsible = TRUE, width = 12, solidHeader = TRUE, collapsed = TRUE,
 
-          shiny::fluidRow(
-            shiny::column(
-              width = 6,
-              shiny::selectInput(
-                inputId = shiny::NS(id, "base_layer_data_source"),
-                label = "Source",
-                choices = c(
-                  "Raw Overdose Case Data",
-                  "Filtered Overdose Case Data",
-                  "Drug-related Crime Data"
-                  # TODO: Make 311 Data available
-                  #"311 Request Data"
-                ),
-                selected = NULL
-              )
-            ),
+          shiny::tabsetPanel(
 
-            shiny::column(
-              width = 6,
-              shiny::selectInput(
-                inputId = shiny::NS(id, "base_layer_display_option"),
-                label = "Display Option",
-                choices = c(
-                  "nested cluster",
-                  "point level",
-                  "spatial rate"
+            # ================================== #
+            # ---- Tab: Base Layer Controls ----
+            # ================================== #
+            shiny::tabPanel(
+              "Base Layer",
+              shiny::fluidRow(
+                shiny::column(
+                  width = 6,
+                  shiny::selectInput(
+                    inputId = shiny::NS(id, "base_layer_data_source"),
+                    label = "Source",
+                    choices = c(
+                      "Raw Overdose Case Data",
+                      "Filtered Overdose Case Data",
+                      "Drug-related Crime Data"
+                      # TODO: Make 311 Data available
+                      #"311 Request Data"
+                    ),
+                    selected = NULL
+                  )
                 ),
-                selected = NULL
-              )
-            )
-          ),
 
-          shiny::fluidRow(
-            shiny::column(
-              width = 12,
-              shinyWidgets::sliderTextInput(
-                inputId = shiny::NS(id, "date_range"),
-                label = "Date Range",
-                choices = purrr::map_chr(
-                  .x = seq(
-                    from = as.Date("2008-01-01"),
-                    to = Sys.Date(),
-                    by = "1 month"),
-                  .f = function(date) {
-                    year <- lubridate::year(date)
-                    month_num <- lubridate::month(date)
-                    return(paste0(year, "-", month_num))
-                  }
-                ),
-                selected = purrr::map_chr(
-                  .x = c(as.Date("2008-01-01"), Sys.Date()),
-                  .f = function(date) {
-                    year <- lubridate::year(date)
-                    month_num <- lubridate::month(date)
-                    return(paste0(year, "-", month_num))
-                  }
+                shiny::column(
+                  width = 6,
+                  shiny::selectInput(
+                    inputId = shiny::NS(id, "base_layer_display_option"),
+                    label = "Display Option",
+                    choices = c(
+                      "nested cluster",
+                      "spatial rate"
+                    ),
+                    selected = NULL
+                  )
+                )
+              ),
+
+              shiny::fluidRow(
+                shiny::column(
+                  width = 12,
+                  shinyWidgets::sliderTextInput(
+                    inputId = shiny::NS(id, "date_range"),
+                    label = "Date Range",
+                    choices = purrr::map_chr(
+                      .x = seq(
+                        from = as.Date("2008-01-01"),
+                        to = Sys.Date(),
+                        by = "1 month"),
+                      .f = function(date) {
+                        year <- lubridate::year(date)
+                        month_num <- lubridate::month(date)
+                        return(paste0(year, "-", month_num))
+                      }
+                    ),
+                    selected = purrr::map_chr(
+                      .x = c(as.Date("2008-01-01"), Sys.Date()),
+                      .f = function(date) {
+                        year <- lubridate::year(date)
+                        month_num <- lubridate::month(date)
+                        return(paste0(year, "-", month_num))
+                      }
+                    )
+                  )
+                )
+              ),
+
+
+
+              shiny::fluidRow(
+
+                shiny::column(
+                  width = 12,
+                  # ======================= #
+                  # ---- Param: Update ---- #
+                  # ======================= #
+                  shiny::actionButton(
+                    inputId = shiny::NS(id, "update_base_layer"),
+                    label = "Update Base Layer"
+                  )
                 )
               )
-            )
-          ),
-
-
-
-          shiny::fluidRow(
-
-            shiny::column(
-              width = 12,
-              # ======================= #
-              # ---- Param: Update ---- #
-              # ======================= #
-              shiny::actionButton(
-                inputId = shiny::NS(id, "update_base_layer"),
-                label = "Update Base Layer"
-              )
-            )
-          )
-        ),
-
-
-        # ================================ #
-        # ---- Box: Hot Spot Controls ----
-        # ================================ #
-
-
-        shinydashboard::box(
-          id = "fcph_hotspot", title = shiny::tagList(shiny::icon("gear"), "Hot Spot Layer"),
-          status = NULL, width = 12,
-          collapsible = TRUE, solidHeader = TRUE, collapsed = TRUE,
-
-
-          shiny::fluidRow(
-
-            shiny::column(
-              width = 6,
-              # =========================== #
-              # ---- Param: Bin Width ----  #
-              # =========================== #
-
-              shiny::numericInput(
-                inputId = shiny::NS(id, "hot_spot_bin_width"),
-                label = "Bin Size",
-                min = 0,
-                value = 0.01,
-                step = 0.001
-              )
-            ),
-            shiny::column(
-              width = 6,
-              # ========================= #
-              # ---- Param: Quantile ---- #
-              # ========================= #
-              shiny::numericInput(
-                inputId = shiny::NS(id, "hot_spot_quantile"),
-                label = "Hot Spot Quantile",
-                min = 0,
-                max = 0.99,
-                value = 0.75,
-                step = 0.01
-              )
-            )
-
-          ),
-
-          shiny::fluidRow(
-            shiny::column(
-              width = 6,
-              # ===================================== #
-              # ---- Param: Overdose Data Source ---- #
-              # ===================================== #
-              shiny::selectInput(
-                inputId = shiny::NS(id, "hot_spot_od_data_source"),
-                label = "Choose overdose cases data source",
-                choices = c(
-                  "Raw Overdose Case Data",
-                  "Filtered Overdose Case Data"
-                ),
-                selected = NULL
-              )
             ),
 
-            shiny::column(
-              width = 6,
-              # ======================= #
-              # ---- Param: Update ---- #
-              # ======================= #
-              shiny::actionButton(
-                inputId = shiny::NS(id, "update_param_hot_spot"),
-                label = "Update Hyperparameters"
-              )
-            )
-          )
+            # ============================= #
+            # ---- Tab: Hot Spot Layer ----
+            # ============================= #
 
-        )
-
-      ),
-
-      shiny::absolutePanel(
-        id = "overview",
-        fixed = TRUE,
-        draggable = FALSE,
-        top = "auto", left = "auto",
-        right = 20, bottom = 20,
-        width = 800, height = "auto",
-
-
-        shinydashboard::box(
-          id = "summary", title = shiny::tagList(shiny::icon("map"), "Locations"),
-          status = NULL, width = 12,
-          collapsible = TRUE, solidHeader = TRUE, collapsed = TRUE,
-
-          shiny::tabsetPanel(
             shiny::tabPanel(
-              "Hot Spot",
+              "Hot Spot Layer",
+
+              shiny::fluidRow(
+
+                shiny::column(
+                  width = 6,
+                  # =========================== #
+                  # ---- Param: Bin Width ----  #
+                  # =========================== #
+
+                  shiny::numericInput(
+                    inputId = shiny::NS(id, "hot_spot_bin_width"),
+                    label = "Bin Size",
+                    min = 0,
+                    value = 0.01,
+                    step = 0.001
+                  )
+                ),
+                shiny::column(
+                  width = 6,
+                  # ========================= #
+                  # ---- Param: Quantile ---- #
+                  # ========================= #
+                  shiny::numericInput(
+                    inputId = shiny::NS(id, "hot_spot_quantile"),
+                    label = "Hot Spot Quantile",
+                    min = 0,
+                    max = 0.99,
+                    value = 0.75,
+                    step = 0.01
+                  )
+                )
+
+              ),
+
+              shiny::fluidRow(
+                shiny::column(
+                  width = 6,
+                  # ===================================== #
+                  # ---- Param: Overdose Data Source ---- #
+                  # ===================================== #
+                  shiny::selectInput(
+                    inputId = shiny::NS(id, "hot_spot_od_data_source"),
+                    label = "Choose overdose cases data source",
+                    choices = c(
+                      "Raw Overdose Case Data",
+                      "Filtered Overdose Case Data"
+                    ),
+                    selected = NULL
+                  )
+                ),
+
+                shiny::column(
+                  width = 6,
+                  # ======================= #
+                  # ---- Param: Update ---- #
+                  # ======================= #
+                  shiny::actionButton(
+                    inputId = shiny::NS(id, "update_param_hot_spot"),
+                    label = "Update Hyperparameters"
+                  )
+                )
+              ),
+
               shiny::plotOutput(
                 outputId = shiny::NS(id, "hot_spot_map_mini"),
                 height = "500px",
                 width = "100%"
               )
             ),
-            shiny::tabPanel("b")
+
+            # ================================= #
+            # ---- Tab: Region of Interest ----
+            # ================================= #
+            shiny::tabPanel(
+              "Region Analysis",
+
+              # EWMA Chart
+
+              # Resource List
+
+              # shiny::selectizeInput(
+              #   inputId = shiny::NS(id, "selector_school_district"),
+              #   label = "School District",
+              #   multiple = TRUE,
+              #   choices = c(), #TODO
+              #   selected = ""
+              # ),
+              #
+              # shiny::selectizeInput(
+              #   inputId = shiny::NS(id, "selector_fire_district"),
+              #   label = "Fire District",
+              #   multiple = TRUE,
+              #   choices = c(), #TODO
+              #   selected = ""
+              # ),
+              #
+              # shiny::selectizeInput(
+              #   inputId = shiny::NS(id, "selector_census_tract"),
+              #   label = "Census Tract",
+              #   multiple = TRUE,
+              #   choices = c(), #TODO
+              #   selected = ""
+              # ),
+              #
+              # shiny::selectizeInput(
+              #   inputId = shiny::NS(id, "selector_zip"),
+              #   label = "Zip",
+              #   multiple = TRUE,
+              #   choices = c(), #TODO
+              #   selected = ""
+              # )
+            ),
+
+
           )
-
         )
-
       )
 
     )
@@ -272,6 +290,63 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
 
     zipcode_sf <-
       get_zipcode_sf()
+
+    # > Food Pantries
+    food_pantries <-
+      data_food_pantries()
+
+    food_pantries_icon <-
+      leaflet::makeIcon(
+        iconUrl  = "inst/icons/food.png",
+        iconWidth = 36,
+        iconHeight = 36
+      )
+
+    # > HIV Testing Locations
+    hiv_testing_locations <-
+      data_hiv_testing_locations()
+
+    hiv_testing_locations_icon <-
+      leaflet::makeAwesomeIcon(
+        icon = 'health',
+        library = 'ion',
+        iconColor = 'white',
+        markerColor = 'red'
+      )
+
+    # > Treatment Providers
+    treatment_providers_data_all <- opioidDashboard::treatment_providers_data(tier_2_only = TRUE)
+
+    # > Hep C Treatment
+    hepc_treatment <- data_hepc_treatment()
+    hepc_treatmetn_facilities <-
+      hepc_treatment %>%
+      dplyr::count(
+        .data$adrs_id,
+        .data$org_nm,
+        .data$adr_geocode,
+        .data$lat,
+        .data$lng,
+        .data$school_district,
+        .data$EMS,
+        .data$census_tract
+      ) %>%
+      dplyr::mutate(
+        popup = paste(sep = "<br/>",
+          "<b>Hep C Treatment Resource<b>",
+          glue::glue(
+            "<b>{org_name}</b>", org_name = .data$org_nm
+          ),
+          glue::glue(
+            "<b>Address: </b>{org_addr}", org_addr = .data$adr_geocode
+          ),
+          glue::glue(
+            "<b>Number of Doctors: </b>{n_doc}", n_doc = .data$n
+          )
+        )
+      )
+
+
 
     # ========================= #
     # ---- Hyperparameters ----
@@ -731,6 +806,63 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
         fillOpacity = 0.40,
         opacity = 0
       ) %>%
+        # ====================== #
+        # ---- Food Pantries ----
+      # ======================= #
+      leaflet::addMarkers(
+        data = food_pantries,
+        lat = ~lat,
+        lng = ~lng,
+        popup = ~popup_label,
+        icon = food_pantries_icon,
+        group = "Food Pantries"
+      ) %>%
+        # =============================== #
+        # ---- HIV Testing Locations ----
+      # ================================ #
+      leaflet::addAwesomeMarkers(
+        data = hiv_testing_locations,
+        lat = ~lat,
+        lng = ~lng,
+        popup = ~popup_label,
+        icon = hiv_testing_locations_icon,
+        group = "HIV Testing Sites"
+      ) %>%
+        # ============================= #
+        # ---- Treatment Providers ----
+      # ============================== #
+        leaflet::addMarkers(
+          data = treatment_providers_data_all,
+          lng = ~lng, lat = ~lat,
+          popup = ~popup,
+          #label = ~label,
+          group = "Treatment Providers",
+          labelOptions = leaflet::labelOptions(
+            style = list(
+              "font-size" = "15px",
+              "font-style" = "bold",
+              "border-color" = "rgba(0,0,0,0.5)"
+            )
+          )
+        ) %>%
+        # =================================== #
+        # ---- HepC Treatment Facilities ----
+      # ==================================== #
+      leaflet::addMarkers(
+        data = hepc_treatmetn_facilities,
+        lng = ~lng, lat = ~lat,
+        popup = ~popup,
+        #label = ~label,
+        group = "Hep C Treatment Facilities"
+        # labelOptions = leaflet::labelOptions(
+        #   style = list(
+        #     "font-size" = "15px",
+        #     "font-style" = "bold",
+        #     "border-color" = "rgba(0,0,0,0.5)"
+        #   )
+        # )
+      ) %>%
+
         # ======================== #
         # ---- Layers Control ----
       # ======================== #
@@ -744,7 +876,11 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           "FC School Districts",
           "Fire Districts",
           "Census Tract",
-          "Zip Code"
+          "Zip Code",
+          "Food Pantries",
+          "HIV Testing Sites",
+          "Treatment Providers",
+          "Hep C Treatment Facilities"
         ),
         options = leaflet::layersControlOptions(collapsed = FALSE)
       ) %>%
@@ -754,7 +890,11 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "FC School Districts",
             "Fire Districts",
             "Census Tract",
-            "Zip Code"
+            "Zip Code",
+            "Food Pantries",
+            "HIV Testing Sites",
+            "Treatment Providers",
+            "Hep C Treatment Facilities"
           )
         ) %>%
 
@@ -803,11 +943,19 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     # ==================== #
     # ---- Map Update ----
     # ==================== #
+
+    map_select_region <- shiny::reactiveValues(
+      value = NULL,
+      group = NULL,
+      click = NULL
+    )
+
     shiny::observe({
 
       click <- input$fcph_map_shape_click
 
       selected_region <- NULL
+      group<- NULL
 
       if (!is.null(click)) {
 
@@ -816,28 +964,70 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           selected_region <-
             geocoding_sf(click$lat, click$lng, sf = franklin_county_school_district_sf, id = "NAME")
 
+          group <- "school_district"
+
         } else if (click$group == "Fire Districts") {
 
           selected_region <-
             geocoding_sf(click$lat, click$lng, sf = fire_districts_sf, id = "DEPARTMENT")
+
+          group <- "EMS"
 
         } else if (click$group == "Census Tract") {
 
           selected_region <-
             geocoding_sf(click$lat, click$lng, sf = census_tract_sf, id = "GEOID")
 
+          group <- "census_tract"
+
         } else if (click$group == "Zip Code") {
 
           selected_region <-
             geocoding_sf(click$lat, click$lng, sf = zipcode_sf, id = "GEOID")
 
+          group <- "zip"
+
         }
+
       }
 
-      print(selected_region)
+      print(click)
 
+      #print(selected_region)
+      map_select_region$value <- selected_region
+      map_select_region$group <- group
+      #map_select_region$click <- click
 
     })
+
+    shiny::observe({
+
+      print(map_select_region$value)
+      print(map_select_region$group)
+
+      # if (!is.null(map_select_region$value)) {
+      #   print("not null")
+      #   region <- map_select_region$value
+      #   attr <- map_select_region$group
+      #   if (region %in% map_select_stack$value$name) {
+      #     map_select_stack$value <-
+      #       map_select_stack$value %>%
+      #       dplyr::filter(
+      #         !name %in% region
+      #       )
+      #   } else {
+      #     map_select_stack$value <-
+      #       map_select_stack$value %>%
+      #       rbind(
+      #         c(region, attr)
+      #       )
+      #   }
+      # }
+    })
+
+    # shiny::observe({
+    #   print(map_select_stack$value)
+    # })
 
 
     shiny::observeEvent(input$update_base_layer, {
@@ -970,7 +1160,11 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           ),
           overlayGroups = c(
             "Heatmap",
-            "Fire Districts"
+            "Fire Districts",
+            "Food Pantries",
+            "HIV Testing Sites",
+            "Treatment Providers",
+            "Hep C Treatment Facilities"
           ),
           options = leaflet::layersControlOptions(collapsed = FALSE)
         ) %>%
@@ -980,7 +1174,11 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
               "Heatmap",
               "Fire Districts",
               "FC School Districts",
-              "Census Tract"
+              "Census Tract",
+              "Food Pantries",
+              "HIV Testing Sites",
+              "Treatment Providers",
+              "Hep C Treatment Facilities"
             )
           )
 
