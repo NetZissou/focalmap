@@ -47,6 +47,7 @@ Imports:
     leaflet.extras,
     lubridate,
     magrittr,
+    plotly,
     purrr,
     reactable,
     readr,
@@ -63,6 +64,7 @@ Imports:
     stringr,
     tibble,
     tidyr,
+    timetk,
     tools,
     tsibble,
     vroom

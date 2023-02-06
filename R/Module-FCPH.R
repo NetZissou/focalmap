@@ -43,7 +43,7 @@ fcphUI <- function(id) {
       shiny::absolutePanel(
         id = "controls",
         fixed = TRUE,
-        draggable = TRUE,
+        draggable = FALSE,
         top = 100, left = 20,
         right = "auto", bottom = "auto",
         width = 700, height = "auto",
@@ -247,10 +247,35 @@ fcphUI <- function(id) {
                 )
               ),
 
+              shiny::tabsetPanel(
+                type = "tabs",
 
-              reactable::reactableOutput(
-                outputId = shiny::NS(id, "od_count_by_agency_table")
-              )
+                shiny::tabPanel(
+                  "Aggregation Plot",
+                  shinyWidgets::radioGroupButtons(
+                    inputId = shiny::NS(id, "agg_choice"),
+                    label = NULL,
+                    choices = list(
+                      Year = "year",
+                      Month = "month",
+                      Week = "week"
+                    ),
+                    status = "danger"
+                  ),
+
+                  highcharter::highchartOutput(
+                    shiny::NS(id, "agg_plot")
+                  )
+                ),
+
+                shiny::tabPanel(
+                  "Count by Agency",
+
+                  reactable::reactableOutput(
+                    outputId = shiny::NS(id, "od_count_by_agency_table")
+                  )
+                )
+              ),
 
 
               # EWMA Chart
@@ -1343,6 +1368,63 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
 
     })
 
+    # =============== #
+    # > Agg plot ---- #
+    output$agg_plot <- highcharter::renderHighchart({
+
+      if (!rlang::is_empty(region_od_data$value)) {
+        agg_data <-
+          region_od_data$value %>%
+          dplyr::mutate(
+            value = 1
+          ) %>%
+          timetk::summarise_by_time(
+            .date_var = date_ingested,
+            .by = input$agg_choice,
+            value = sum(value)
+          ) %>%
+          timetk::pad_by_time(.date_var = date_ingested, .pad_value = 0) %>%
+          dplyr::mutate(
+            date_ingested = as.Date(.data$date_ingested)
+          )
+
+        plot_title <- glue::glue(
+          "<b>Opioid Overdose Cases Agg by {agg_choice}</b>",
+          agg_choice = stringr::str_to_title(input$agg_choice)
+        )
+
+        plot_subtitle <- stringr::str_c(input$region_select, collapse = ", ")
+
+        highcharter::hchart(
+          agg_data, type  = "area", name = "OD Cases",
+          highcharter::hcaes(x = date_ingested, y = value)
+        ) %>%
+          highcharter::hc_title(
+            text = plot_title,
+            align = "left",
+            style = list(useHTML = TRUE)
+          ) %>%
+          highcharter::hc_subtitle(
+            text = plot_subtitle,
+            align = "left",
+            style = list(useHTML = TRUE)
+          ) %>%
+          highcharter::hc_yAxis(
+            title = FALSE
+          ) %>%
+          highcharter::hc_xAxis(
+            title = FALSE
+          ) %>%
+          highcharter::hc_navigator(
+            enabled = TRUE
+          ) %>%
+          highcharter::hc_exporting(
+            enabled = TRUE,
+            filename = "od_agg"
+          )
+      }
+
+    })
 
     # ===============================
     # > OD count by agency table ----
