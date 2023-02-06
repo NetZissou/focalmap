@@ -219,6 +219,40 @@ fcphUI <- function(id) {
             shiny::tabPanel(
               "Region Analysis",
 
+              shiny::fluidRow(
+                shiny::column(
+                  width = 6,
+                  shiny::selectizeInput(
+                    inputId = shiny::NS(id, "region_type"),
+                    label = "Region Type",
+                    multiple = FALSE,
+                    choices = list(
+                      `Zip` = "zip",
+                      `Census Tract` = "census_tract",
+                      `School District` = "school_district",
+                      `EMS` = "EMS"
+                    ),
+                    selected = ""
+                  ),
+                ),
+                shiny::column(
+                  width = 6,
+                  shiny::selectizeInput(
+                    inputId = shiny::NS(id, "region_select"),
+                    label = "Choices",
+                    multiple = TRUE,
+                    choices = c(),
+                    selected = ""
+                  )
+                )
+              ),
+
+
+              reactable::reactableOutput(
+                outputId = shiny::NS(id, "od_count_by_agency_table")
+              )
+
+
               # EWMA Chart
 
               # Resource List
@@ -353,6 +387,10 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     # > COTA lines
     sf_cota_lines <-
       get_cota_bus_lines_sf()
+
+    # > 311 Heatmap
+    heatmap_data_311 <-
+      data_columbus_311_heatmap()
 
     # ========================= #
     # ---- Hyperparameters ----
@@ -522,6 +560,40 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
 
     })
 
+    # ===================================== #
+    # > Update param: Region Selection ----
+
+    shiny::observeEvent(input$region_type, {
+
+      region_type <- input$region_type
+
+      if (region_type == "zip") {
+
+        shiny::updateSelectizeInput(
+          inputId = "region_select",
+          choices = zipcode_sf$GEOID
+        )
+      } else if (region_type == "census_tract") {
+
+        shiny::updateSelectizeInput(
+          inputId = "region_select",
+          choices = census_tract_sf$GEOID
+        )
+      } else if (region_type == "school_district") {
+
+        shiny::updateSelectizeInput(
+          inputId = "region_select",
+          choices = franklin_county_school_district_sf$NAME
+        )
+      } else if (region_type == "EMS") {
+
+        shiny::updateSelectizeInput(
+          inputId = "region_select",
+          choices = opioidDashboard::AGENCY
+        )
+      }
+
+    })
 
 
     # =================================== #
@@ -894,6 +966,20 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           group = "COTA Stops"
         ) %>%
 
+        # ============================== #
+        # ---- Columbus 311 Heatmap ----
+      # =============================== #
+      leaflet::addRectangles(
+        data = heatmap_data_311,
+        group = "Columbus 311 Request Heatmap (2022)",
+        lng1 = ~xmin, lng2 = ~xmax,
+        lat1 = ~ymin, lat2 = ~ymax,
+        color = ~fill,
+        dashArray = "3",
+        fillColor = ~fill,
+        fillOpacity = 0.60,
+        opacity = 0
+      ) %>%
         # ======================== #
         # ---- Layers Control ----
       # ======================== #
@@ -913,7 +999,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           "Treatment Providers",
           "Hep C Treatment Facilities",
           "COTA Lines",
-          "COTA Stops"
+          "COTA Stops",
+          "Columbus 311 Request Heatmap (2022)"
         ),
         options = leaflet::layersControlOptions(collapsed = FALSE)
       ) %>%
@@ -929,7 +1016,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "Treatment Providers",
             "Hep C Treatment Facilities",
             "COTA Lines",
-            "COTA Stops"
+            "COTA Stops",
+            "Columbus 311 Request Heatmap (2022)"
           )
         ) %>%
 
@@ -975,9 +1063,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     })
 
 
-    # ==================== #
-    # ---- Map Update ----
-    # ==================== #
+    # ==================================== #
+    # ---- Map Update (click observe) ----
+    # ==================================== #
 
     map_select_region <- shiny::reactiveValues(
       value = NULL,
@@ -1201,7 +1289,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "Treatment Providers",
             "Hep C Treatment Facilities",
             "COTA Lines",
-            "COTA Stops"
+            "COTA Stops",
+            "Columbus 311 Request Heatmap (2022)"
           ),
           options = leaflet::layersControlOptions(collapsed = FALSE)
         ) %>%
@@ -1217,7 +1306,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
               "Treatment Providers",
               "Hep C Treatment Facilities",
               "COTA Lines",
-              "COTA Stops"
+              "COTA Stops",
+              "Columbus 311 Request Heatmap (2022)"
             )
           )
 
@@ -1227,6 +1317,70 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     })
 
 
+    # ========================= #
+    # ---- Region Analysis ----
+    # ========================= #
+
+    # ====================== #
+    # > Region Od Data ----- #
+    region_od_data <- shiny::reactiveValues(
+      value = NULL
+    )
+
+    shiny::observe({
+      region_type <- input$region_type
+      region_select <- input$region_select
+
+      if (!rlang::is_empty(region_select)) {
+        region_od_data$value <-
+          od_data_all %>%
+          dplyr::filter(
+            .data[[region_type]] %in% region_select
+          )
+      } else {
+        region_od_data$value <- NULL
+      }
+
+    })
+
+
+    # ===============================
+    # > OD count by agency table ----
+    output$od_count_by_agency_table <- reactable::renderReactable({
+
+      od_count_by_agency <-
+        tibble::tibble(
+          Agency = character(),
+          Count = numeric()
+        )
+
+
+      if (!rlang::is_empty(region_od_data$value)) {
+        od_count_by_agency <-
+          od_count_by_agency %>%
+          dplyr::bind_rows(
+            region_od_data$value %>%
+              dplyr::count(.data$agency, sort = TRUE) %>%
+              purrr::set_names(c("Agency", "Count"))
+          )
+      }
+
+      od_count_by_agency %>%
+        reactable::reactable(
+          # Table Format
+          filterable = TRUE,
+          outlined = TRUE,
+          # Selection
+          selection = "multiple", onClick = "select",
+          highlight = TRUE,
+          theme = reactable::reactableTheme(
+            rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d")
+          ),
+          # Table Size
+          defaultPageSize = 5, minRows = 5
+        )
+
+    })
 
 
 

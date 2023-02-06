@@ -176,3 +176,14 @@ data_hepc_treatment <- function(arrow = FALSE) {
     ))
   }
 }
+
+data_columbus_311_heatmap <- function() {
+  return(
+    readr::read_csv(
+      fs::path(
+        opioidDashboard::ROOT_PATH,
+        "other", "311", "Heatmap", "heatmap_data_columbus_2022.csv"
+      )
+    )
+  )
+}
