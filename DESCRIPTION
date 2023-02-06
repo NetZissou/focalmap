@@ -38,6 +38,7 @@ Imports:
     fs,
     ggmap,
     ggplot2,
+    glue,
     highcharter,
     htmltools,
     htmlwidgets,

@@ -333,20 +333,26 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
       ) %>%
       dplyr::mutate(
         popup = paste(sep = "<br/>",
-          "<b>Hep C Treatment Resource<b>",
-          glue::glue(
-            "<b>{org_name}</b>", org_name = .data$org_nm
-          ),
-          glue::glue(
-            "<b>Address: </b>{org_addr}", org_addr = .data$adr_geocode
-          ),
-          glue::glue(
-            "<b>Number of Doctors: </b>{n_doc}", n_doc = .data$n
-          )
+                      "<b>Hep C Treatment Resource<b>",
+                      glue::glue(
+                        "<b>{org_name}</b>", org_name = .data$org_nm
+                      ),
+                      glue::glue(
+                        "<b>Address: </b>{org_addr}", org_addr = .data$adr_geocode
+                      ),
+                      glue::glue(
+                        "<b>Number of Doctors: </b>{n_doc}", n_doc = .data$n
+                      )
         )
       )
 
+    # > COTA stops
+    sf_cota_stops <-
+      get_cota_bus_stops_sf()
 
+    # > COTA lines
+    sf_cota_lines <-
+      get_cota_bus_lines_sf()
 
     # ========================= #
     # ---- Hyperparameters ----
@@ -831,20 +837,20 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
         # ============================= #
         # ---- Treatment Providers ----
       # ============================== #
-        leaflet::addMarkers(
-          data = treatment_providers_data_all,
-          lng = ~lng, lat = ~lat,
-          popup = ~popup,
-          #label = ~label,
-          group = "Treatment Providers",
-          labelOptions = leaflet::labelOptions(
-            style = list(
-              "font-size" = "15px",
-              "font-style" = "bold",
-              "border-color" = "rgba(0,0,0,0.5)"
-            )
+      leaflet::addMarkers(
+        data = treatment_providers_data_all,
+        lng = ~lng, lat = ~lat,
+        popup = ~popup,
+        #label = ~label,
+        group = "Treatment Providers",
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-size" = "15px",
+            "font-style" = "bold",
+            "border-color" = "rgba(0,0,0,0.5)"
           )
-        ) %>%
+        )
+      ) %>%
         # =================================== #
         # ---- HepC Treatment Facilities ----
       # ==================================== #
@@ -863,6 +869,31 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
         # )
       ) %>%
 
+        # ======================= #
+        # ---- COTA BUS Info ----
+      # ======================== #
+      leaflet::addPolylines(
+        data = sf_cota_lines,
+        color = "black",
+        label = ~LineName,
+        highlight = leaflet::highlightOptions(
+          weight = 8,
+          #fillOpacity = 0.1,
+          color = "blue",
+          #dashArray = "",
+          #opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        ),
+        group = "COTA Lines"
+      ) %>%
+        leaflet::addCircles(
+          data = sf_cota_stops,
+          color = "red",
+          popup = ~StopName,
+          group = "COTA Stops"
+        ) %>%
+
         # ======================== #
         # ---- Layers Control ----
       # ======================== #
@@ -880,7 +911,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           "Food Pantries",
           "HIV Testing Sites",
           "Treatment Providers",
-          "Hep C Treatment Facilities"
+          "Hep C Treatment Facilities",
+          "COTA Lines",
+          "COTA Stops"
         ),
         options = leaflet::layersControlOptions(collapsed = FALSE)
       ) %>%
@@ -894,7 +927,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "Food Pantries",
             "HIV Testing Sites",
             "Treatment Providers",
-            "Hep C Treatment Facilities"
+            "Hep C Treatment Facilities",
+            "COTA Lines",
+            "COTA Stops"
           )
         ) %>%
 
@@ -1164,7 +1199,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "Food Pantries",
             "HIV Testing Sites",
             "Treatment Providers",
-            "Hep C Treatment Facilities"
+            "Hep C Treatment Facilities",
+            "COTA Lines",
+            "COTA Stops"
           ),
           options = leaflet::layersControlOptions(collapsed = FALSE)
         ) %>%
@@ -1178,7 +1215,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
               "Food Pantries",
               "HIV Testing Sites",
               "Treatment Providers",
-              "Hep C Treatment Facilities"
+              "Hep C Treatment Facilities",
+              "COTA Lines",
+              "COTA Stops"
             )
           )
 
