@@ -230,7 +230,7 @@ fcphUI <- function(id) {
                       `Zip` = "zip",
                       `Census Tract` = "census_tract",
                       `School District` = "school_district",
-                      `EMS` = "EMS"
+                      `EMS Agency` = "agency"
                     ),
                     selected = ""
                   ),
@@ -316,6 +316,54 @@ fcphUI <- function(id) {
             ),
 
 
+            shiny::tabPanel(
+              "Search",
+              shiny::fluidRow(
+                shiny::column(
+                  width = 8,
+                  shiny::textInput(
+                    shiny::NS(id, "street_address"),
+                    label = "Street"
+                  )
+                ),
+                shiny::column(
+                  width = 4,
+                  shiny::textInput(
+                    shiny::NS(id, "city"),
+                    label = "City"
+                  )
+                ),
+              ),
+              shiny::fluidRow(
+                shiny::column(
+                  width = 4,
+                  shiny::textInput(
+                    shiny::NS(id, "county"),
+                    label = "County"
+                  )
+                ),
+                shiny::column(
+                  width = 4,
+                  shiny::textInput(
+                    shiny::NS(id, "zip"),
+                    label = "Zip"
+                  )
+                ),
+                shiny::column(
+                  width = 4,
+                  shiny::actionButton(
+                    shiny::NS(id, "search"),
+                    "Search"
+                  ),
+                  shiny::actionButton(
+                    shiny::NS(id, "export"),
+                    "Export"
+                  )
+                )
+              ),
+
+              reactable::reactableOutput(shiny::NS(id, "search_table"))
+            )
           )
         )
       )
@@ -610,7 +658,7 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           inputId = "region_select",
           choices = franklin_county_school_district_sf$NAME
         )
-      } else if (region_type == "EMS") {
+      } else if (region_type == "agency") {
 
         shiny::updateSelectizeInput(
           inputId = "region_select",
@@ -1005,6 +1053,19 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
         fillOpacity = 0.60,
         opacity = 0
       ) %>%
+
+        # =================================== #
+        # ---- FCPH Location of Interest ----
+      # ==================================== #
+      leaflet::addMarkers(
+        data = opioidDashboard::FCPH_LOCATION_OF_INTEREST,
+        #lng = ~lng, lat = ~lat,
+        popup = ~popup,
+        #label = ~label,
+        group = "FCPH Location of Interest"
+      ) %>%
+
+
         # ======================== #
         # ---- Layers Control ----
       # ======================== #
@@ -1025,7 +1086,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           "Hep C Treatment Facilities",
           "COTA Lines",
           "COTA Stops",
-          "Columbus 311 Request Heatmap (2022)"
+          "Columbus 311 Request Heatmap (2022)",
+          "FCPH Location of Interest"
         ),
         options = leaflet::layersControlOptions(collapsed = FALSE)
       ) %>%
@@ -1042,7 +1104,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "Hep C Treatment Facilities",
             "COTA Lines",
             "COTA Stops",
-            "Columbus 311 Request Heatmap (2022)"
+            "Columbus 311 Request Heatmap (2022)",
+            "FCPH Location of Interest"
           )
         ) %>%
 
@@ -1315,7 +1378,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "Hep C Treatment Facilities",
             "COTA Lines",
             "COTA Stops",
-            "Columbus 311 Request Heatmap (2022)"
+            "Columbus 311 Request Heatmap (2022)",
+            "FCPH Location of Interest"
           ),
           options = leaflet::layersControlOptions(collapsed = FALSE)
         ) %>%
@@ -1332,7 +1396,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
               "Hep C Treatment Facilities",
               "COTA Lines",
               "COTA Stops",
-              "Columbus 311 Request Heatmap (2022)"
+              "Columbus 311 Request Heatmap (2022)",
+              "FCPH Location of Interest"
             )
           )
 
@@ -1357,11 +1422,21 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
       region_select <- input$region_select
 
       if (!rlang::is_empty(region_select)) {
-        region_od_data$value <-
+
+        filter_result <-
           od_data_all %>%
           dplyr::filter(
             .data[[region_type]] %in% region_select
           )
+
+        if (nrow(filter_result) != 0) {
+          region_od_data$value <-
+            filter_result
+        } else {
+          region_od_data$value <- NULL
+        }
+
+
       } else {
         region_od_data$value <- NULL
       }
@@ -1453,7 +1528,7 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           filterable = TRUE,
           outlined = TRUE,
           # Selection
-          selection = "multiple", onClick = "select",
+          #selection = "multiple", onClick = "select",
           highlight = TRUE,
           theme = reactable::reactableTheme(
             rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d")
@@ -1463,6 +1538,326 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
         )
 
     })
+
+
+    # ========================== #
+    # ---- Search Locations ----
+    # ========================== #
+
+    full_address <- shiny::reactiveValues(
+      value = NULL,
+      geocoding_result = NULL
+    )
+
+    search_table_data <- shiny::reactiveValues(
+      value = tibble::tibble(
+        type = character(),
+        name = character(),
+        contact = character(),
+        address = character()
+      )
+    )
+
+    map_thumbtack <- leaflet::makeAwesomeIcon(
+      icon = "thumbtack",
+      iconColor = "black",
+      markerColor = "green",
+      library = "fa"
+    )
+
+    map_pin <- leaflet::makeAwesomeIcon(
+      icon = "map-pin",
+      iconColor = "black",
+      markerColor = "red",
+      library = "fa"
+    )
+
+    # Update Address
+    shiny::observeEvent(input$search, {
+
+      # print(input$street_address)
+      # print(input$zip)
+      # print(input$city)
+      # print(input$county)
+
+      if (input$street_address != "") {
+
+        addr <- input$street_address
+        if (input$city != "") {
+          addr <- stringr::str_c(
+            c(addr, input$city), collapse = ", "
+          )
+        }
+        if (input$county != "") {
+          addr <- stringr::str_c(
+            c(addr, input$county), collapse = ", "
+          )
+        }
+        if (input$zip != "") {
+          addr <- stringr::str_c(
+            c(addr, input$zip), collapse = ", "
+          )
+        }
+
+        full_address$value <- addr
+
+      } else {
+        full_address$value <- NULL
+      }
+    })
+
+    # Filter
+    shiny::observe({
+
+      if (!rlang::is_empty(full_address$value)) {
+
+        geocoding_result <-
+          geocoding(full_address$value)
+
+        if (is.na(geocoding_result$lat)) {
+          full_address$geocoding_result <- NULL
+
+          leaflet::leafletProxy("fcph_map") %>%
+            leaflet::clearGroup(
+              c("Search")
+            )
+
+          search_table_data$value <-
+            tibble::tibble(
+              type = character(),
+              name = character(),
+              contact = character(),
+              address = character()
+            )
+
+        } else {
+
+          # Update geocoding result
+          full_address$geocoding_result <- geocoding_result
+
+          leaflet::leafletProxy("fcph_map") %>%
+            leaflet::clearGroup(
+              c("Search")
+            ) %>%
+            leaflet::addAwesomeMarkers(
+              lat = full_address$geocoding_result$lat,
+              lng = full_address$geocoding_result$lng,
+              icon = map_thumbtack,
+              group = "Search"
+              # full_address$value
+            )
+
+
+          zip_search <- full_address$geocoding_result$zip_geocode
+
+          search_table <-
+            tibble::tibble(
+              type = character(),
+              name = character(),
+              contact = character(),
+              address = character()
+            )
+
+          # > Food Pantires
+          filtered_food_pantries <-
+            food_pantries %>%
+            dplyr::filter(
+              as.character(.data$zip_code) %in% zip_search
+            )
+
+          if (nrow(filtered_food_pantries) != 0) {
+            search_table <-
+              search_table %>%
+              dplyr::bind_rows(
+                filtered_food_pantries %>%
+                  dplyr::transmute(
+                    type = "Food Pantries",
+                    name = .data$name,
+                    contact = .data$website,
+                    address = .data$street_address
+                  )
+              )
+          }
+
+          # > HIV Testing Sites
+          filtered_hiv_testing_locations <-
+            hiv_testing_locations %>%
+            dplyr::filter(
+              as.character(.data$zip) %in% zip_search
+            )
+
+          if (nrow(filtered_hiv_testing_locations) != 0) {
+
+            search_table <-
+              search_table %>%
+              dplyr::bind_rows(
+                filtered_hiv_testing_locations %>%
+                  dplyr::transmute(
+                    type = "HIV Testing Locations",
+                    name = .data$name,
+                    contact = glue::glue(
+                      "Phone: {phone}; Website: {website}",
+                      phone = .data$telephone,
+                      website = .data$website
+                    ),
+                    address = .data$street_address
+                  )
+              )
+          }
+          # > Treatment Providers
+          filtered_treatment_providers <-
+            treatment_providers_data_all %>%
+            dplyr::filter(
+              as.character(.data$zip) %in% zip_search
+            )
+
+          if (nrow(filtered_treatment_providers) != 0) {
+
+            search_table <-
+              search_table %>%
+              dplyr::bind_rows(
+                filtered_treatment_providers %>%
+                  dplyr::transmute(
+                    type = "Treatment Providers",
+                    name = .data$name,
+                    contact = glue::glue(
+                      "Phone: {phone}; Website: {website}",
+                      phone = .data$phone,
+                      website = .data$website
+                    ),
+                    address = .data$address
+                  )
+              )
+          }
+
+
+          # > Hep C Treatment Providers
+          filtered_hep_C_treatment_providers <-
+            hepc_treatment %>%
+            dplyr::filter(
+              stringr::str_detect(
+                as.character(.data$zip),
+                zip_search
+              )
+            )
+
+          if (nrow(filtered_hep_C_treatment_providers) != 0) {
+
+            search_table <-
+              search_table %>%
+              dplyr::bind_rows(
+                filtered_hep_C_treatment_providers %>%
+                  dplyr::transmute(
+                    type = "Hep C Treatment Providers",
+                    name = glue::glue(
+                      "{lst_nm}, {frst_nm}; Org: {org_nm}",
+                      lst_nm = .data$lst_nm,
+                      frst_nm = .data$frst_nm,
+                      org_nm = .data$org_nm
+                    ),
+                    contact = glue::glue(
+                      "Phone: {phone}",
+                      phone = as.character(.data$phn_numbr)
+                    ),
+                    address = .data$adr_geocode
+                  )
+              )
+          }
+
+          # > COTA Stops
+          filtered_COTA_stops <-
+            sf_cota_stops %>%
+            dplyr::filter(
+              as.character(.data$ZIP_CODE) %in% zip_search
+            )
+
+          if (nrow(filtered_COTA_stops) != 0) {
+
+            search_table <-
+              search_table %>%
+              dplyr::bind_rows(
+                tibble::as_tibble(filtered_COTA_stops) %>%
+                  dplyr::transmute(
+                    type = "COTA Bus Stop",
+                    name = glue::glue(
+                      "Line: {line}; Stop: {stop}",
+                      line = .data$Lines, stop = .data$StopName
+                    ),
+                    contact = NA,
+                    address = .data$StopName
+                  )
+              )
+          }
+
+          # > FCPH Location of Interest
+          filtered_FCPH_location_of_interest <-
+            opioidDashboard::FCPH_LOCATION_OF_INTEREST %>%
+            dplyr::filter(
+              as.character(.data$zip_geocode) %in% zip_search
+            )
+
+          if (nrow(filtered_FCPH_location_of_interest) != 0) {
+
+            search_table <-
+              search_table %>%
+              dplyr::bind_rows(
+                tibble::as_tibble(filtered_FCPH_location_of_interest) %>%
+                  dplyr::transmute(
+                    type = "FCPH Location of Interest",
+                    name = .data$name,
+                    contact = NA,
+                    address = .data$address
+                  )
+              )
+          }
+
+          search_table_data$value <- search_table
+        }
+
+      }
+
+      #print(full_address$geocoding_result)
+    })
+
+    # Update Table
+    output$search_table <- reactable::renderReactable({
+
+      search_table_data$value %>%
+        purrr::set_names(
+          c("Type", "Name", "Contact", "Address")
+        ) %>%
+        reactable::reactable(
+          # Group
+          groupBy = "Type",
+          # Table Format
+          filterable = TRUE,
+          outlined = TRUE,
+          height = 400,
+          # Selection
+          #selection = "multiple",
+          onClick = "select",
+          highlight = TRUE,
+          theme = reactable::reactableTheme(
+            rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d")
+          ),
+          # Table Size
+          defaultPageSize = 5, minRows = 5
+        )
+    })
+
+    # Download Table
+    output$export <- shiny::downloadHandler(
+      filename = function() {
+        paste("search_result.csv", sep="")
+      },
+      content = function(file) {
+        readr::write_csv(search_table_data$value, file)
+      }
+    )
+
+
+
+
 
 
 

@@ -33,6 +33,7 @@ RoxygenNote: 7.1.2
 Imports: 
     apexcharter,
     bslib,
+    crayon,
     devtools,
     dplyr,
     fs,
@@ -42,6 +43,7 @@ Imports:
     highcharter,
     htmltools,
     htmlwidgets,
+    httr,
     janitor,
     leaflet,
     leaflet.extras,
