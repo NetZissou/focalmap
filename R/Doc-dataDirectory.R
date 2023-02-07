@@ -29,3 +29,6 @@
 
 #' naloxone schema used for data loading
 "schema_naloxone"
+
+#' a list of OD data agency
+"AGENCY"
