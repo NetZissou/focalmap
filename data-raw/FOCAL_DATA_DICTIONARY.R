@@ -57,7 +57,7 @@ FOCAL_DATA_DICTIONARY <-
         get_attr_html(),
       comment = "Perform addtional geocoding phase to calculate case rate for zip code, EMS district, and school district",
       file_location = fs::path(
-        FOCALPipe::ROOT_PATH,
+        opioidDashboard::ROOT_PATH,
         "other", "Drug Crime"
       )
     ),
@@ -88,7 +88,7 @@ FOCAL_DATA_DICTIONARY <-
       ),
       comment = "",
       file_location = fs::path(
-        FOCALPipe::ROOT_PATH,
+        opioidDashboard::ROOT_PATH,
         "other", "Food Pantries"
       )
     ),
@@ -124,7 +124,7 @@ FOCAL_DATA_DICTIONARY <-
       ),
       comment = "Explore other type of diease treatments.",
       file_location = fs::path(
-        FOCALPipe::ROOT_PATH,
+        opioidDashboard::ROOT_PATH,
         "other",
         "Doctors and Clinicians",
         "doctors_columbus.csv"
@@ -143,7 +143,7 @@ FOCAL_DATA_DICTIONARY <-
       attributes = "Same as Columbus Doctors and Clinicians dataset",
       comment = "One doctor could have multiple work locations. Treatment locations would stack together on map because they usually nested within one institution.",
       file_location = fs::path(
-        FOCALPipe::ROOT_PATH,
+        opioidDashboard::ROOT_PATH,
         "other",
         "Doctors and Clinicians",
         "doctors_columbus_hepc.csv"
@@ -177,7 +177,7 @@ FOCAL_DATA_DICTIONARY <-
         "language"
       )),
       file_location = fs::path(
-        FOCALPipe::ROOT_PATH,
+        opioidDashboard::ROOT_PATH,
         "other",
         "HIV",
         "hiv_columbus_treatment_service.RData"
@@ -199,7 +199,7 @@ FOCAL_DATA_DICTIONARY <-
       )),
       comment = "The latest 30 to 60 days naloxone distribution data is preliminary. ",
       file_location = fs::path(
-        FOCALPipe::ROOT_PATH,
+        opioidDashboard::ROOT_PATH,
         "other",
         "Naloxone",
         "naloxone.csv"
@@ -223,7 +223,7 @@ FOCAL_DATA_DICTIONARY <-
         stringr::str_c(stringr::str_to_title(opioidDashboard::ELIGIBLE_BUSINESS_TYPE), collapse = "; ")
       ),
       file_location = fs::path(
-        FOCALPipe::ROOT_PATH,
+        opioidDashboard::ROOT_PATH,
         "other",
         "Ohio Businesses",
         "ohio_businesses.csv"
@@ -245,7 +245,7 @@ FOCAL_DATA_DICTIONARY <-
       attributes = "",
       comment = "Treatment providers filter need to be improved; grand category; key words; new hierarchy",
       file_location = fs::path(
-        FOCALPipe::ROOT_PATH,
+        opioidDashboard::ROOT_PATH,
         "other",
         "Relink"
       )
