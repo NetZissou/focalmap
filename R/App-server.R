@@ -42,6 +42,7 @@ server <- function(input, output, session) {
     od_data_all = od_data_all
   )
 
+
   fcphSERVER(
     "fcph",
     filtered_overdose_data = opioid_overdose_data_filtered,
@@ -49,6 +50,7 @@ server <- function(input, output, session) {
     drug_crime_data_all = drug_crime_data_all
   )
 
-  #devInfoServer("dev_info", parent_session = session)
+  devInfoServer("dev_info", parent_session = session)
+
 
 }
