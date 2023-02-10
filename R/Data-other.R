@@ -187,3 +187,14 @@ data_columbus_311_heatmap <- function() {
     )
   )
 }
+
+data_public_places <- function() {
+  return(
+    sf::st_read(
+      fs::path(
+        opioidDashboard::ROOT_PATH,
+        "other", "Public Places", "columbus_public_places_geocoded.geojson"
+      )
+    )
+  )
+}

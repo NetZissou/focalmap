@@ -174,5 +174,19 @@ get_cota_bus_stops_sf <- function() {
 }
 
 
+#' Load Jurisdictions
+#'
+#' @return sf object
+#' @export
+#'
+get_jurisdictions_sf <-
+  function(root = opioidDashboard::ROOT_PATH) {
+    sf::st_read(
+      fs::path(
+        root, "other", "Shapefile", "sf_jurisdictions.geojson"
+      )
+    )
+  }
+
 
 
