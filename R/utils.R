@@ -175,4 +175,13 @@ parse_month <- function(file_path) {
   return(file_path)
 }
 
+# make_icon <- function(color) {
+#
+#   leaflet::awesomeIcons(
+#     icon = "circle",
+#     library = "fa",
+#     markerColor = color,
+#     iconColor = "white"
+#   )
+# }
 

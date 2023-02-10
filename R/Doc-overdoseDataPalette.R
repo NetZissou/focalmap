@@ -3,3 +3,6 @@
 
 #' overdose case rate default palette
 "overdose_case_rate_palette"
+
+#' COLORS
+"COLORS"
