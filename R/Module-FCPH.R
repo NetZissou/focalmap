@@ -398,6 +398,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     zipcode_sf <-
       get_zipcode_sf()
 
+    jurisdiction_sf <-
+      get_jurisdictions_sf()
+
     # > Food Pantries
     food_pantries <-
       data_food_pantries()
@@ -464,6 +467,10 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     # > 311 Heatmap
     heatmap_data_311 <-
       data_columbus_311_heatmap()
+
+    # > Public Places
+    public_places <-
+      data_public_places()
 
     # ========================= #
     # ---- Hyperparameters ----
@@ -943,6 +950,43 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           sendToBack = TRUE
         )
       ) %>%
+        # ========================================= #
+        # ---- Shapefile outline: Jurisdiction ----
+      # ======================================== #
+      leaflet::addPolygons(
+        data = jurisdiction_sf,
+        group = "Jurisdiction",
+        stroke = TRUE,
+        color = "#555555",
+        weight = 1,
+        opacity = 0.8,
+        dashArray = "3",
+        fillOpacity = 0.1,
+        #options = leaflet::pathOptions(pane = "County_districts_polyline"),
+
+        label = ~ paste0(
+          "<b>", name, "</b>"
+        ) %>% lapply(htmltools::HTML),
+
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
+          ),
+          textsize = "15px",
+          direction = "auto"
+        ),
+
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
         # =========================== #
         # ---- Hot Spot Heat Map ----
       # ============================ #
@@ -1065,6 +1109,120 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
         group = "FCPH Location of Interest"
       ) %>%
 
+        # ======================= #
+        # ---- Public Places ----
+      # ======================= #
+      # leaflet::addAwesomeMarkers(
+      #   data = public_places,
+      #   #lng = ~lng, lat = ~lat,
+      #   label = ~POI_NAME,
+      #   popup = ~popup,
+      #   icon = public_places_icons,
+      #   #label = ~label,
+      #   group = "Public Places"
+      # ) %>%
+
+      # > Arena/Statdium
+      leaflet::addAwesomeMarkers(
+        data = public_places %>% dplyr::filter(type == "Arena/Stadium"),
+        #lng = ~lng, lat = ~lat,
+        label = ~POI_NAME,
+        popup = ~popup,
+        icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Arena/Stadium`,
+        #label = ~label,
+        group = "Public Places - Arena/Stadium"
+      ) %>%
+        # > Cemetery
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "Cemetery"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Cemetery`,
+          #label = ~label,
+          group = "Public Places - Cemetery"
+        ) %>%
+
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "Community/Recreation Center"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Community/Recreation Center`,
+          #label = ~label,
+          group = "Public Places - Community/Recreation Center"
+        ) %>%
+
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "Convention Center"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Convention Center`,
+          #label = ~label,
+          group = "Public Places - Convention Center"
+        ) %>%
+
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "Historic Site"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Historic Site`,
+          #label = ~label,
+          group = "Public Places - Historic Site"
+        ) %>%
+
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "House of Worship"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`House of Worship`,
+          #label = ~label,
+          group = "Public Places - House of Worship"
+        ) %>%
+
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "Library"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Library`,
+          #label = ~label,
+          group = "Public Places - Library"
+        ) %>%
+
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "Museum"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Museum`,
+          #label = ~label,
+          group = "Public Places - Museum"
+        ) %>%
+
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "Other"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Other`,
+          #label = ~label,
+          group = "Public Places - Other"
+        ) %>%
+
+        leaflet::addAwesomeMarkers(
+          data = public_places %>% dplyr::filter(type == "Theater/Concert Hall"),
+          #lng = ~lng, lat = ~lat,
+          label = ~POI_NAME,
+          popup = ~popup,
+          icon = opioidDashboard::PUBLIC_PLACES_ICON_LIST$`Theater/Concert Hall`,
+          #label = ~label,
+          group = "Public Places - Theater/Concert Hall"
+        ) %>%
+
 
         # ======================== #
         # ---- Layers Control ----
@@ -1080,6 +1238,7 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           "Fire Districts",
           "Census Tract",
           "Zip Code",
+          "Jurisdiction",
           "Food Pantries",
           "HIV Testing Sites",
           "Treatment Providers",
@@ -1087,7 +1246,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           "COTA Lines",
           "COTA Stops",
           "Columbus 311 Request Heatmap (2022)",
-          "FCPH Location of Interest"
+          "FCPH Location of Interest",
+          #"Public Places"
+          stringr::str_c("Public Places - ", names(opioidDashboard::PUBLIC_PLACES_ICON_LIST))
         ),
         options = leaflet::layersControlOptions(collapsed = FALSE)
       ) %>%
@@ -1098,6 +1259,7 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "Fire Districts",
             "Census Tract",
             "Zip Code",
+            "Jurisdiction",
             "Food Pantries",
             "HIV Testing Sites",
             "Treatment Providers",
@@ -1105,7 +1267,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "COTA Lines",
             "COTA Stops",
             "Columbus 311 Request Heatmap (2022)",
-            "FCPH Location of Interest"
+            "FCPH Location of Interest",
+            #"Public Places"
+            stringr::str_c("Public Places - ", names(opioidDashboard::PUBLIC_PLACES_ICON_LIST))
           )
         ) %>%
 
@@ -1370,6 +1534,7 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "Census Tract"
           ),
           overlayGroups = c(
+            "Jurisdiction",
             "Heatmap",
             "Fire Districts",
             "Food Pantries",
@@ -1379,13 +1544,16 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "COTA Lines",
             "COTA Stops",
             "Columbus 311 Request Heatmap (2022)",
-            "FCPH Location of Interest"
+            "FCPH Location of Interest",
+            #"Public Places"
+            stringr::str_c("Public Places - ", names(opioidDashboard::PUBLIC_PLACES_ICON_LIST))
           ),
           options = leaflet::layersControlOptions(collapsed = FALSE)
         ) %>%
           leaflet::showGroup("Zip Code") %>%
           leaflet::hideGroup(
             c(
+              "Jurisdiction",
               "Heatmap",
               "Fire Districts",
               "FC School Districts",
@@ -1397,7 +1565,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
               "COTA Lines",
               "COTA Stops",
               "Columbus 311 Request Heatmap (2022)",
-              "FCPH Location of Interest"
+              "FCPH Location of Interest",
+              #"Public Places"
+              stringr::str_c("Public Places - ", names(opioidDashboard::PUBLIC_PLACES_ICON_LIST))
             )
           )
 
@@ -1807,6 +1977,28 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
                     name = .data$name,
                     contact = NA,
                     address = .data$address
+                  )
+              )
+          }
+
+          # > Public Locations
+          filtered_public_locations <-
+            public_places %>%
+            dplyr::filter(
+              as.character(.data$zipcode) %in% zip_search
+            )
+
+          if (nrow(filtered_public_locations)) {
+
+            search_table <-
+              search_table %>%
+              dplyr::bind_rows(
+                tibble::as_tibble(filtered_public_locations) %>%
+                  dplyr::transmute(
+                    type = .data$type,
+                    name = .data$POI_NAME,
+                    contact = NA,
+                    address = .data$LSN
                   )
               )
           }
