@@ -65,6 +65,7 @@ Imports:
     stats,
     stringr,
     tibble,
+    tidygeocoder,
     tidyr,
     timetk,
     tools,
