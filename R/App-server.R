@@ -10,6 +10,8 @@ server <- function(input, output, session) {
 
   od_data_all <- opioidDashboard::data_opioid_overdose()
 
+  drug_crime_data_all <- opioidDashboard::data_drug_crime()
+
   project_DAWN_data <- projectDAWNFilterServer(
     "naloxone_filter",
     od_data_all = od_data_all
@@ -23,7 +25,8 @@ server <- function(input, output, session) {
   opioid_overdose_data_filtered <-
     opioidOverdoseFiltersServer(
       "overdose_filters",
-      od_data_all
+      od_data_all,
+      drug_crime_data_all
     )
 
   hotSpotDetectionServer(
@@ -39,6 +42,15 @@ server <- function(input, output, session) {
     od_data_all = od_data_all
   )
 
+
+  fcphSERVER(
+    "fcph",
+    filtered_overdose_data = opioid_overdose_data_filtered,
+    od_data_all = od_data_all,
+    drug_crime_data_all = drug_crime_data_all
+  )
+
   #devInfoServer("dev_info", parent_session = session)
+
 
 }

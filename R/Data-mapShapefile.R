@@ -136,7 +136,57 @@ get_naloxone_box_sf <- function() {
   )
 }
 
+#' Load COTA bus lines shapefiles
+#'
+#' @return sf object
+#' @export
+#'
+get_cota_bus_lines_sf <- function() {
+  return(
+    sf::st_read(
+      fs::path(
+        opioidDashboard::ROOT_PATH,
+        "other", "COTA",
+        "cota_lines_2022_09.shp"
+      )
+    ) %>%
+      sf::st_transform(crs = 4326)
+  )
+}
 
+
+#' Load COTA bus stops shapefiles
+#'
+#' @return sf object
+#' @export
+#'
+get_cota_bus_stops_sf <- function() {
+  return(
+    sf::st_read(
+      fs::path(
+        opioidDashboard::ROOT_PATH,
+        "other", "COTA",
+        "cota_stops_2022_09"
+      )
+    ) %>%
+      sf::st_transform(crs = 4326)
+  )
+}
+
+
+#' Load Jurisdictions
+#'
+#' @return sf object
+#' @export
+#'
+get_jurisdictions_sf <-
+  function(root = opioidDashboard::ROOT_PATH) {
+    sf::st_read(
+      fs::path(
+        root, "other", "Shapefile", "sf_jurisdictions.geojson"
+      )
+    )
+  }
 
 
 

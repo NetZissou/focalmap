@@ -13,3 +13,5 @@
 #' A static Columbus roadmap for opioid hot spot detection
 "COLUMBUS_STATIC_ROADMAP"
 
+#' FCPH_LOCATION_OF_INTEREST
+"FCPH_LOCATION_OF_INTEREST"

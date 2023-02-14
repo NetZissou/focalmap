@@ -72,6 +72,15 @@ ui <- function() {
                       opioidOverdoseRateUI("od_case_rate")
       ),
 
+      # =================== #
+      # ---- Tab: FCPH ----
+      # =================== #
+
+      shiny::tabPanel(value = "tab_fcph",
+                      title = "FCPH",
+                      fcphUI("fcph")
+      ),
+
       # ============================================================= #
       # ---- Tab: Application Development Information (DEV ONLY) ----
       # ============================================================= #
