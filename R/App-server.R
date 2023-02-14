@@ -50,7 +50,7 @@ server <- function(input, output, session) {
     drug_crime_data_all = drug_crime_data_all
   )
 
-  devInfoServer("dev_info", parent_session = session)
+  #devInfoServer("dev_info", parent_session = session)
 
 
 }
