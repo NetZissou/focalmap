@@ -355,9 +355,10 @@ fcphUI <- function(id) {
                     shiny::NS(id, "search"),
                     "Search"
                   ),
-                  shiny::actionButton(
+                  shiny::downloadButton(
                     shiny::NS(id, "export"),
-                    "Export"
+                    label = "Export",
+                    icon = NULL
                   )
                 )
               ),
@@ -2040,16 +2041,12 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     # Download Table
     output$export <- shiny::downloadHandler(
       filename = function() {
-        paste("search_result.csv", sep="")
+        paste("search_result", Sys.Date(), ".csv", sep="")
       },
       content = function(file) {
         readr::write_csv(search_table_data$value, file)
       }
     )
-
-
-
-
 
 
 
