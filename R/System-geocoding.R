@@ -1,3 +1,160 @@
+#' Tidy Geocoder
+#'
+#' @param address
+#'
+#' @return
+#' @export
+tidy_geocoding <- function(address) {
+
+  # =================== #
+  # ---- US Census ----
+  # =================== #
+
+  geocoding_result <-
+    tidygeocoder::geo(
+      address = address,
+      method = "census",
+      lat = "lat", long = "lng",
+      full_results = TRUE
+    )
+
+  if (!is.na(geocoding_result$lat)) {
+    return(
+      geocoding_result %>%
+        dplyr::transmute(
+          address = .data$address,
+          lat = .data$lat,
+          lng = .data$lng,
+          city = .data$addressComponents.city,
+          county = NA_character_,
+          zip_geocode = as.character(.data$addressComponents.zip)
+        )
+    )
+  }
+
+  # ================== #
+  # ---- Geocodio ----
+  # ================== #
+
+  geocoding_result <-
+    tidygeocoder::geo(
+      address = address,
+      method = "geocodio",
+      lat = "lat", long = "lng",
+      full_results = TRUE
+    )
+
+  if (!is.na(geocoding_result$lat)) {
+    return(
+      geocoding_result %>%
+        dplyr::transmute(
+          address = .data$address,
+          lat = .data$lat,
+          lng = .data$lng,
+          city = .data$address_components.city,
+          county = .data$address_components.county,
+          zip_geocode = as.character(.data$address_components.zip)
+        )
+    )
+  }
+
+
+  # =========================== #
+  # ---- Location opencage ----
+  # =========================== #
+
+  geocoding_result <-
+    tidygeocoder::geo(
+      address = address,
+      method = "opencage",
+      lat = "lat", long = "lng",
+      full_results = TRUE
+    )
+
+  if (!is.na(geocoding_result$lat)) {
+    return(
+      geocoding_result %>%
+        dplyr::transmute(
+          address = .data$address,
+          lat = .data$lat,
+          lng = .data$lng,
+          city = .data$components.city,
+          county = .data$components.county,
+          zip_geocode = as.character(.data$components.postcode)
+        )
+    )
+  }
+
+  # ================== #
+  # ---- Mapquest ----
+  # ================== #
+
+  # geocoding_result <-
+  #   tidygeocoder::geo(
+  #     address = address,
+  #     method = "mapquest",
+  #     lat = "lat", long = "lng",
+  #     full_results = TRUE
+  #   )
+  #
+  # if (!is.na(geocoding_result$lat)) {
+  #   return(
+  #     geocoding_result %>%
+  #       dplyr::transmute(
+  #         address = .data$address,
+  #         lat = .data$lat,
+  #         lng = .data$lng,
+  #         city = .data$adminArea5,
+  #         county = .data$adminArea4,
+  #         zip_geocode = as.character(.data$postalCode)
+  #       )
+  #   )
+  # }
+
+  # ================== #
+  # ---- Geoapify ----
+  # ================== #
+
+  geocoding_result <-
+    tidygeocoder::geo(
+      address = address,
+      method = "geoapify",
+      lat = "lat", long = "lng",
+      full_results = TRUE
+    )
+
+  if (!is.na(geocoding_result$lat)) {
+    return(
+      geocoding_result %>%
+        dplyr::transmute(
+          address = .data$address,
+          lat = .data$lat,
+          lng = .data$lng,
+          city = .data$geoapify_city,
+          county = .data$geoapify_county,
+          zip_geocode = as.character(.data$geoapify_postcode)
+        )
+    )
+  }
+
+  # ======================= #
+  # ---- Fail Geocoded ----
+  # ======================= #
+
+  return(
+    tibble::tibble(
+      address =address,
+      lat = NA_real_,
+      lng = NA_real_,
+      city = NA_character_,
+      county = NA_character_,
+      zip_geocode = NA_character_
+    )
+  )
+
+}
+
+
 #' Geocoding a list of address using Nominatim, US Census.
 #'
 #' @param address_list a list of address that should be geocoded
