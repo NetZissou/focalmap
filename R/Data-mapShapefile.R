@@ -189,4 +189,23 @@ get_jurisdictions_sf <-
   }
 
 
+#' Load City, Village, and Township outlines
+#'
+#' @return sf object
+#' @export
+#'
+get_city_sf <-
+  function(root = opioidDashboard::ROOT_PATH) {
+    sf::st_read(
+      fs::path(
+        root, "other", "Shapefile", "sf_city_village_township.geojson"
+      )
+    )
+  }
 
+
+# sf::st_read(
+#   fs::path(
+#     opioidDashboard::ROOT_PATH, "other", "Shapefile", "boundaries_Muni_Twp_Co_outlines.kmz"
+#   )
+# ) -> x
