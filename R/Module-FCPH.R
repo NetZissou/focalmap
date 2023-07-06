@@ -473,6 +473,12 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     public_places <-
       data_public_places()
 
+    # > OD Death Data
+    od_death_rate_ct <-
+      data_drug_overdose_deaths_ct_10yr_rate()
+    od_death_rate_zip <-
+      data_drug_overdose_deaths_zip_5yr_rate()
+
     # ========================= #
     # ---- Hyperparameters ----
     # ========================= #
@@ -533,6 +539,18 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
         #   )
         # )
       )
+
+    pal_death_rate_ct <- leaflet::colorQuantile(
+      palette = "YlOrRd",
+      domain = od_death_rate_ct$rate,
+      n = 5
+    )
+
+    pal_death_rate_zip <- leaflet::colorQuantile(
+      palette = "YlOrRd",
+      domain = od_death_rate_zip$rate,
+      n = 5
+    )
 
     # ======================================= #
     # > Update param: hot spot detection ----
@@ -1224,6 +1242,74 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           group = "Public Places - Theater/Concert Hall"
         ) %>%
 
+        # ============================================ #
+        # ---- Unintentional Drug Overdose Deaths ----
+      # ============================================= #
+
+      leaflet::addPolygons(
+        data = od_death_rate_ct,
+        group = "OD Death 10yrs Rate by CT",
+        stroke = TRUE,
+        color = ~pal_death_rate_ct(rate), #~hyper_params_sf_rate$census_tract$pal(rate_pal),
+        weight = 1,
+        #opacity = 0.8,
+        dashArray = "3",
+        #fillOpacity = 0.1,
+
+        label = ~ label %>% lapply(htmltools::HTML),
+
+        labelOptions = leaflet::labelOptions(
+          style = list(
+            "font-weight" = "normal",
+            padding = "3px 8px"
+          ),
+          textsize = "15px",
+          direction = "auto"
+        ),
+
+        highlight = leaflet::highlightOptions(
+          weight = 3,
+          fillOpacity = 0.1,
+          color = "black",
+          dashArray = "",
+          opacity = 0.5,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
+      ) %>%
+
+        leaflet::addPolygons(
+          data = od_death_rate_zip,
+          group = "OD Death 5yrs Rate by Zip",
+          stroke = TRUE,
+          color = ~pal_death_rate_zip(rate), #~hyper_params_sf_rate$census_tract$pal(rate_pal),
+          weight = 1,
+          #opacity = 0.8,
+          dashArray = "3",
+          #fillOpacity = 0.1,
+
+          label = ~ label %>% lapply(htmltools::HTML),
+
+          labelOptions = leaflet::labelOptions(
+            style = list(
+              "font-weight" = "normal",
+              padding = "3px 8px"
+            ),
+            textsize = "15px",
+            direction = "auto"
+          ),
+
+          highlight = leaflet::highlightOptions(
+            weight = 3,
+            fillOpacity = 0.1,
+            color = "black",
+            dashArray = "",
+            opacity = 0.5,
+            bringToFront = TRUE,
+            sendToBack = TRUE
+          )
+        ) %>%
+
 
         # ======================== #
         # ---- Layers Control ----
@@ -1248,6 +1334,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           "COTA Stops",
           "Columbus 311 Request Heatmap (2022)",
           "FCPH Location of Interest",
+          "OD Death 5yrs Rate by Zip",
+          "OD Death 10yrs Rate by CT",
           #"Public Places"
           stringr::str_c("Public Places - ", names(opioidDashboard::PUBLIC_PLACES_ICON_LIST))
         ),
@@ -1269,6 +1357,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "COTA Stops",
             "Columbus 311 Request Heatmap (2022)",
             "FCPH Location of Interest",
+            "OD Death 5yrs Rate by Zip",
+            "OD Death 10yrs Rate by CT",
             #"Public Places"
             stringr::str_c("Public Places - ", names(opioidDashboard::PUBLIC_PLACES_ICON_LIST))
           )
@@ -1546,6 +1636,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             "COTA Stops",
             "Columbus 311 Request Heatmap (2022)",
             "FCPH Location of Interest",
+            "OD Death 5yrs Rate by Zip",
+            "OD Death 10yrs Rate by CT",
             #"Public Places"
             stringr::str_c("Public Places - ", names(opioidDashboard::PUBLIC_PLACES_ICON_LIST))
           ),
@@ -1567,6 +1659,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
               "COTA Stops",
               "Columbus 311 Request Heatmap (2022)",
               "FCPH Location of Interest",
+              "OD Death 5yrs Rate by Zip",
+              "OD Death 10yrs Rate by CT",
               #"Public Places"
               stringr::str_c("Public Places - ", names(opioidDashboard::PUBLIC_PLACES_ICON_LIST))
             )
