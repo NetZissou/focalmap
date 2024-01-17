@@ -1,8 +1,8 @@
 #' Get the business information from Ohio
-#'
+#' @param parquet
 #' @return business information from Ohio
 #' @export
-get_ohio_business <- function() {
+get_ohio_business <- function(parquet = FALSE) {
   # suppressMessages(
   #   suppressWarnings(
   #     vroom::vroom(
@@ -23,11 +23,26 @@ get_ohio_business <- function() {
   #       stats::na.omit()
   #   )
   # )
-  suppressMessages(
-    suppressWarnings(
-      vroom::vroom(
-        file = "/fs/ess/PDE0001/focal_data_ingestion/other/Ohio Businesses/ohio_businesses.csv"
+  if (parquet) {
+    arrow::read_parquet(
+      fs::path(
+        opioidDashboard::ROOT_PATH,
+        "other", "Ohio Businesses",
+        "ohio_businesses.parquet"
+      ),
+      as_data_frame = FALSE
+    )
+  } else {
+    suppressMessages(
+      suppressWarnings(
+        vroom::vroom(
+          file = fs::path(
+            opioidDashboard::ROOT_PATH,
+            "other", "Ohio Businesses",
+            "ohio_businesses.csv"
+          )
+        )
       )
     )
-  )
+  }
 }

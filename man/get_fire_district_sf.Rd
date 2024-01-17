@@ -4,7 +4,10 @@
 \alias{get_fire_district_sf}
 \title{Load fire district shapefiles}
 \usage{
-get_fire_district_sf()
+get_fire_district_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object

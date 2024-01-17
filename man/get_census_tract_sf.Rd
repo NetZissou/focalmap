@@ -4,7 +4,10 @@
 \alias{get_census_tract_sf}
 \title{Load census tract shapefiles}
 \usage{
-get_census_tract_sf()
+get_census_tract_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object

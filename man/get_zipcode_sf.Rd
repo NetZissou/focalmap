@@ -4,7 +4,10 @@
 \alias{get_zipcode_sf}
 \title{Load zip code level shapefiles}
 \usage{
-get_zipcode_sf()
+get_zipcode_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object

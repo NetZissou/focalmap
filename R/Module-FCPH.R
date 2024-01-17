@@ -387,6 +387,9 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
     # ---- Load Data & Shapefiles ----
     # ================================ #
 
+    od_data_all <- od_data_all %>% dplyr::collect()
+    drug_crime_data_all <- drug_crime_data_all %>% dplyr::collect()
+
     franklin_county_school_district_sf <-
       get_franklin_county_school_district_sf()
 
@@ -806,6 +809,7 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
       # =================== #
       leaflet::addTiles() %>%
         leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) %>%
+        leaflet.extras2::addSpinner() %>%
 
         # ==================== #
         # ---- Base Layer ----
@@ -1310,6 +1314,8 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
           )
         ) %>%
 
+        leaflet.extras2::stopSpinner() %>%
+
 
         # ======================== #
         # ---- Layers Control ----
@@ -1503,6 +1509,7 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
         print("spatial rate")
 
         leaflet::leafletProxy("fcph_map") %>%
+          leaflet.extras2::addSpinner() %>%
           leaflet::clearGroup(
             c(
               "Base Layer",
@@ -1614,6 +1621,7 @@ fcphSERVER <- function(id, filtered_overdose_data, od_data_all, drug_crime_data_
             sendToBack = TRUE
           )
         ) %>%
+          leaflet.extras2::stopSpinner() %>%
           # ======================== #
           # ---- Layers Control ----
         # ======================== #

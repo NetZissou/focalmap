@@ -4,7 +4,10 @@
 \alias{get_jurisdictions_sf}
 \title{Load Jurisdictions}
 \usage{
-get_jurisdictions_sf(root = opioidDashboard::ROOT_PATH)
+get_jurisdictions_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object

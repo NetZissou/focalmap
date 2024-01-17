@@ -155,6 +155,8 @@ opioidOverdoseRateServer <- function(id, filtered_overdose_data,  od_data_all) {
     # ---- A. HyperParams ----
     # ======================== #
 
+    od_data_all <- od_data_all %>% dplyr::collect()
+
     hyper_params <- shiny::reactiveValues(
       data_source = od_data_all,
       data_min = as.Date("2008-01-01"),

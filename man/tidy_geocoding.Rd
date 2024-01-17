@@ -9,9 +9,6 @@ tidy_geocoding(address)
 \arguments{
 \item{address}{}
 }
-\value{
-
-}
 \description{
 Tidy Geocoder
 }
