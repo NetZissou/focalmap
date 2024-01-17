@@ -6,13 +6,19 @@
 \usage{
 treatment_providers_data(
   dir = opioidDashboard::TREATMENT_PROVIDERS_DATA_DIRECTORY,
-  tier_2_only = TRUE
+  tier_2_only = TRUE,
+  processed = TRUE,
+  parquet = FALSE
 )
 }
 \arguments{
 \item{dir}{directory on OSC that contains treament providers data}
 
 \item{tier_2_only}{only show tier 2 treatment providers}
+
+\item{processed}{processed data}
+
+\item{parquet}{parquet}
 }
 \value{
 treatment providers data

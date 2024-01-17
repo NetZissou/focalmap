@@ -4,7 +4,10 @@
 \alias{get_EMS_sf}
 \title{Load EMS shapefile}
 \usage{
-get_EMS_sf()
+get_EMS_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object

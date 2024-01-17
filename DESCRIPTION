@@ -29,9 +29,10 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Imports: 
     apexcharter,
+    arrow,
     bslib,
     crayon,
     devtools,
@@ -47,6 +48,7 @@ Imports:
     janitor,
     leaflet,
     leaflet.extras,
+    leaflet.extras2,
     lubridate,
     magrittr,
     plotly,
@@ -56,6 +58,7 @@ Imports:
     rlang,
     scales,
     sf,
+    sfarrow,
     shiny,
     shinyalert,
     shinydashboard,

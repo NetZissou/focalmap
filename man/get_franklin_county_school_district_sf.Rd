@@ -4,7 +4,10 @@
 \alias{get_franklin_county_school_district_sf}
 \title{Load Franklin county school district shapefiles}
 \usage{
-get_franklin_county_school_district_sf()
+get_franklin_county_school_district_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object

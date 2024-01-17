@@ -4,7 +4,10 @@
 \alias{get_naloxone_box_sf}
 \title{Load naloxone box shapefiles}
 \usage{
-get_naloxone_box_sf()
+get_naloxone_box_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object

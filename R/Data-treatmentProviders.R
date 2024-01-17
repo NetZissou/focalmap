@@ -2,9 +2,54 @@
 #'
 #' @param dir directory on OSC that contains treament providers data
 #' @param tier_2_only only show tier 2 treatment providers
+#' @param processed processed data
+#' @param parquet parquet
 #' @return treatment providers data
 #' @export
 treatment_providers_data <- function(
+  dir = opioidDashboard::TREATMENT_PROVIDERS_DATA_DIRECTORY,
+  tier_2_only = TRUE,
+  processed = TRUE,
+  parquet = FALSE
+) {
+
+  if (!processed) {
+    return(
+      process_treatment_providers(
+        dir = dir,
+        tier_2_only = tier_2_only
+      )
+    )
+  }
+
+  if (parquet) {
+
+    return(
+      arrow::read_parquet(
+        fs::path(
+          opioidDashboard::ROOT_PATH,
+          "other", "Treatment Providers",
+          "treatment_providers_processed.parquet"
+        ),
+        as_data_frame = FALSE
+      )
+    )
+
+  } else {
+    return(
+      readr::read_csv(
+        fs::path(
+          opioidDashboard::ROOT_PATH,
+          "other", "Treatment Providers",
+          "treatment_providers_processed.csv"
+        )
+      )
+    )
+  }
+}
+
+
+process_treatment_providers <- function(
   dir = opioidDashboard::TREATMENT_PROVIDERS_DATA_DIRECTORY,
   tier_2_only = TRUE
 ) {

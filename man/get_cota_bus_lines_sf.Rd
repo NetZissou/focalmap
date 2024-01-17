@@ -4,7 +4,10 @@
 \alias{get_cota_bus_lines_sf}
 \title{Load COTA bus lines shapefiles}
 \usage{
-get_cota_bus_lines_sf()
+get_cota_bus_lines_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object

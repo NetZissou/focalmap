@@ -4,7 +4,10 @@
 \alias{data_drug_crime}
 \title{Loading function for drug crime data}
 \usage{
-data_drug_crime()
+data_drug_crime(parquet = FALSE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 drug crime data

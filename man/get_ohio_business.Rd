@@ -4,7 +4,7 @@
 \alias{get_ohio_business}
 \title{Get the business information from Ohio}
 \usage{
-get_ohio_business()
+get_ohio_business(parquet = FALSE)
 }
 \value{
 business information from Ohio

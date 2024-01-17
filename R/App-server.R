@@ -8,18 +8,17 @@
 server <- function(input, output, session) {
   # bslib::bs_themer()
 
-  od_data_all <- opioidDashboard::data_opioid_overdose()
+  od_data_all <- opioidDashboard::data_opioid_overdose(parquet = TRUE)
+  drug_crime_data_all <- opioidDashboard::data_drug_crime(parquet = TRUE)
 
-  drug_crime_data_all <- opioidDashboard::data_drug_crime()
-
-  project_DAWN_data <- projectDAWNFilterServer(
-    "naloxone_filter",
-    od_data_all = od_data_all
-  )
-  projectDAWNTimeSeriesServer(
-    "naloxone_ts",
-    project_DAWN_data = project_DAWN_data
-  )
+  # project_DAWN_data <- projectDAWNFilterServer(
+  #   "naloxone_filter",
+  #   od_data_all = od_data_all
+  # )
+  # projectDAWNTimeSeriesServer(
+  #   "naloxone_ts",
+  #   project_DAWN_data = project_DAWN_data
+  # )
 
   # data type: reactiveValues{data}
   opioid_overdose_data_filtered <-
@@ -34,7 +33,7 @@ server <- function(input, output, session) {
     filtered_overdose_data = opioid_overdose_data_filtered,
     od_data_all = od_data_all
   )
-  #opioidOverdoseMapServer("opioid_overdose_map", opioid_overdose_data_filtered)
+
 
   opioidOverdoseRateServer(
     "od_case_rate",

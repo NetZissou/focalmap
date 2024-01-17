@@ -4,7 +4,10 @@
 \alias{get_city_sf}
 \title{Load City, Village, and Township outlines}
 \usage{
-get_city_sf(root = opioidDashboard::ROOT_PATH)
+get_city_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object
