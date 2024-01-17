@@ -1,13 +1,17 @@
 #' Loading function for drug crime data
-#'
+#' @param parquet parquet format
 #' @return drug crime data
 #' @export
-data_drug_crime <- function() {
+data_drug_crime <- function(parquet = FALSE) {
 
 
   # ========================== #
   # ---- Latest file path ----
   # ========================== #
+  file_format <- "csv"
+  if (parquet) {
+    file_format <- "parquet"
+  }
 
   latest_data_info <-
     check_files_update_time(
@@ -16,7 +20,7 @@ data_drug_crime <- function() {
         "other",
         "Drug Crime"
       ),
-      regexp = "drug_crime.csv"
+      regexp = paste0("drug_crime.", file_format)
     ) %>%
     head(1)
 
@@ -31,10 +35,18 @@ data_drug_crime <- function() {
   message("Modified at: ", latest_data_modification_time)
 
 
-  data <-
-    vroom::vroom(
-      latest_data_path
-    )
+  if (parquet) {
+    data <-
+      arrow::read_parquet(
+        latest_data_path,
+        as_data_frame = FALSE
+      )
+  } else {
+    data <-
+      vroom::vroom(
+        latest_data_path
+      )
+  }
 
   return(data)
 }

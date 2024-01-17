@@ -741,3 +741,538 @@ opioidOverdoseFiltersServer <- function(id, od_data_all, drug_crime_data_all) {
 
   })
 }
+
+opioidOverdoseFiltersServer <- function(id, od_data_all, drug_crime_data_all) {
+
+  shiny::moduleServer(id, function(input, output, session){
+    # ================================ #
+    # ---- Initialize source data ----
+    # ================================ #
+
+    # Initialize Parameters
+    DATA_DATE_MIN <- min(od_data_all$date, na.rm = TRUE)
+    DATA_DATE_MAX <- max(od_data_all$date, na.rm = TRUE)
+
+    shiny::observeEvent(input$date_range, {
+
+      shiny::updateDateRangeInput(
+        inputId = "date_range",
+        min = as.Date(as.character(DATA_DATE_MIN)),
+        max = as.Date(as.character(DATA_DATE_MAX)),
+        start = as.Date(as.character(DATA_DATE_MIN)),
+        end = as.Date(as.character(DATA_DATE_MAX))
+      )
+    }, ignoreInit = TRUE, once=TRUE)
+
+    # Source data: opioid overdose data
+    filtered_overdose_data <- shiny::reactiveValues(
+      data = od_data_all %>% dplyr::collect()
+    )
+
+    # Source data: drug crime data
+    filtered_drug_crime_data <- shiny::reactiveValues(
+      data = drug_crime_data_all %>% dplyr::collect()
+    )
+
+    # Source data: treatment providers
+    treatment_providers_data_all <- opioidDashboard::treatment_providers_data(
+      processed = TRUE,
+      parquet = FALSE
+    )
+    filtered_treatment_providers_data <- shiny::reactiveValues(
+      data = treatment_providers_data_all
+    )
+
+    n_treatment_providers <- shiny::reactiveValues(
+      value = nrow(treatment_providers_data_all)
+    )
+
+    output$available_treatment_providers <- shiny::renderText({
+
+      text <- paste0(
+        "Number of avaiable treatment providers: ",
+        n_treatment_providers$value
+      )
+      return(text)
+    })
+
+    shiny::observe({
+      # TODO:
+      # df <- treatment_providers_data_all
+      #
+      # n <- nrow(df)
+      #
+      # if (!nothing_selected(input$treatment_providers_spec)) {
+      #
+      #   filtered_providers_id <-
+      #     df  %>%
+      #     tidyr::pivot_longer(
+      #       cols = as.character(opioidDashboard::filter_selection_treatment_providers_spec),
+      #       names_to = "spec",
+      #       values_to = "status"
+      #     ) %>%
+      #     dplyr::filter(
+      #       .data$spec %in% input$treatment_providers_spec,
+      #       .data$status == TRUE
+      #     ) %>%
+      #     dplyr::distinct(.data$id) %>%
+      #     dplyr::pull(.data$id)
+      #
+      #   df <-
+      #     df %>%
+      #     dplyr::filter(
+      #       .data$id %in% filtered_providers_id
+      #     )
+      #   n <- nrow(df)
+      # }
+      #
+      # if (!nothing_selected(input$treatment_providers_service)) {
+      #   df <-
+      #     df %>%
+      #     dplyr::mutate(
+      #       service_flag = purrr::pmap_lgl(
+      #         .l = list(.data$service_list),
+      #         .f = function(service_list, selection) {
+      #           n <- selection %in% service_list
+      #           return(
+      #             sum(n) == length(n)
+      #           )
+      #         },
+      #         selection = input$treatment_providers_service
+      #       )
+      #     ) %>%
+      #     dplyr::filter(.data$service_flag)
+      #
+      #   n <- nrow(df)
+      # }
+      #
+      # n_treatment_providers$value <- n
+    })
+
+    # ================================= #
+    # ---- Update Date Input Range ----
+    # ================================= #
+    # shiny::observeEvent(filtered_overdose_data, {
+    #
+    #   date_range_min <-
+    #     as.Date(
+    #       as.character(
+    #         min(filtered_overdose_data$data$date)
+    #       )
+    #     )
+    #
+    #   date_range_max <-
+    #     as.Date(
+    #       as.character(
+    #         max(filtered_overdose_data$data$date)
+    #       )
+    #     )
+    #
+    #
+    #   shiny::updateDateRangeInput(
+    #     inputId = "date_range",
+    #     label = "Date Range",
+    #     start = date_range_min,
+    #     end = date_range_max,
+    #     min = date_range_min,
+    #     max = date_range_max
+    #   )
+    #
+    #   print(filtered_overdose_data$data %>% dplyr::collect())
+    # })
+    # ================================ #
+    # ---- Action Button Controls ----
+    # ================================ #
+
+    # Action button: toggle filter box
+    # shiny::observeEvent(input$collapse_filter_box, {
+    #
+    #   # shinydashboardPlus::updateBox(
+    #   #   id = "filter_box",
+    #   #   action = "toggle"
+    #   # )
+    # })
+
+    # Action button: reset all filters
+    shiny::observeEvent(input$reset_filters,{
+      # clear spatial
+      spatial_inputs <- c("zip", "agency", "location_type", "destination")
+      for (spatial_input in spatial_inputs) {
+
+        shiny::updateSelectizeInput(
+          inputId = spatial_input,
+          selected = ""
+        )
+      }
+
+
+      # clear demographics
+      demographic_inputs <- c("gender", "race")
+      for (demographic_input in demographic_inputs) {
+
+        shinyWidgets::updatePickerInput(
+          inputId = demographic_input,
+          session = session,
+          selected = ""
+        )
+      }
+
+      # clear temporal
+      shiny::updateDateRangeInput(
+        inputId = "date_range",
+        min = as.character(DATA_DATE_MIN),
+        max = as.character(DATA_DATE_MAX),
+        start = as.character(DATA_DATE_MIN),
+        end = as.character(DATA_DATE_MAX)
+      )
+
+    })
+
+    # Action button: download filtered data
+    output$download_filtered_data <- shiny::downloadHandler(
+      filename = function() {
+        paste("opioid_overdose_filtered_data", Sys.Date(), ".csv", sep="")
+      },
+      content = function(file) {
+        readr::write_csv(filtered_overdose_data$data, file)
+      }
+    )
+
+    # =================== #
+    # ---- Filtering ----
+    # =================== #
+    filter_selection <- shiny::reactiveValues(
+      zip = NULL
+    )
+
+    shiny::observe({
+      filter_selection$zip <- input$zip
+    })
+
+    shiny::observeEvent(input$apply_filters, {
+
+      # Re-initialize the data to make sure that
+      # we are not shrinking the data everytime the users update the filters
+      filtered_overdose_data$data <- od_data_all
+      filtered_drug_crime_data$data <- drug_crime_data_all
+      filtered_treatment_providers_data$data <- treatment_providers_data_all
+
+      # Filters: Gender ====
+      if (!nothing_selected(input$gender)) {
+
+        filtered_overdose_data$data <-
+          filtered_overdose_data$data %>%
+          dplyr::filter(
+            .data$sex %in% input$gender
+          )
+      }
+
+      # Filters: race ====
+      if (!nothing_selected(input$race)) {
+
+        filtered_overdose_data$data <-
+          filtered_overdose_data$data %>%
+          dplyr::filter(
+            .data$race %in% input$race
+          )
+      }
+
+      # Filters: Date Range ====
+      if (!nothing_selected(input$date_range)) {
+        filtered_overdose_data$data <-
+          filtered_overdose_data$data %>%
+          dplyr::filter(
+            .data$date >= lubridate::ymd(input$date_range[1]),
+            .data$date <= lubridate::ymd(input$date_range[2])
+          )
+
+        filtered_drug_crime_data$data <-
+          filtered_drug_crime_data$data %>%
+          dplyr::filter(
+            .data$date >= lubridate::ymd(input$date_range[1]),
+            .data$date <= lubridate::ymd(input$date_range[2])
+          )
+      }
+
+      # Filters: Zip Code ====
+      if (!nothing_selected(input$zip)) {
+
+        filtered_overdose_data$data <-
+          filtered_overdose_data$data %>%
+          dplyr::filter(
+            as.character(.data$zip) %in% as.character(input$zip)
+          )
+      }
+
+      # Filters: Agency ====
+      if (!nothing_selected(input$agency)) {
+
+        filtered_overdose_data$data <-
+          filtered_overdose_data$data %>%
+          dplyr::filter(
+            .data$agency %in% input$agency
+          )
+      }
+
+      # Filters: Location Type ====
+      if (!nothing_selected(input$location_type)) {
+
+        filtered_overdose_data$data <-
+          filtered_overdose_data$data %>%
+          dplyr::filter(
+            .data$location_type %in% input$location_type
+          )
+      }
+
+      # Filters: Destination ====
+      if (!nothing_selected(input$destination)) {
+
+        filtered_overdose_data$data <-
+          filtered_overdose_data$data %>%
+          dplyr::filter(
+            .data$destination %in% input$destination
+          )
+      }
+
+      # Execute
+      filtered_overdose_data$data <-
+        filtered_overdose_data$data %>% dplyr::collect()
+      filtered_drug_crime_data$data <-
+        filtered_drug_crime_data$data %>% dplyr::collect()
+
+      # Filters: Treatment Providers Specification ====
+      if (!nothing_selected(input$treatment_providers_spec)) {
+
+        filtered_providers_id <-
+          filtered_treatment_providers_data$data  %>%
+          tidyr::pivot_longer(
+            cols = as.character(opioidDashboard::filter_selection_treatment_providers_spec),
+            names_to = "spec",
+            values_to = "status"
+          ) %>%
+          dplyr::filter(
+            .data$spec %in% input$treatment_providers_spec,
+            .data$status == TRUE
+          ) %>%
+          dplyr::distinct(.data$id) %>%
+          dplyr::pull(.data$id)
+
+        filtered_treatment_providers_data$data <-
+          filtered_treatment_providers_data$data %>%
+          dplyr::filter(
+            .data$id %in% filtered_providers_id
+          )
+      }
+
+      if (!nothing_selected(input$treatment_providers_service)) {
+        filtered_treatment_providers_data$data <-
+          filtered_treatment_providers_data$data %>%
+          dplyr::mutate(
+            service_flag = purrr::pmap_lgl(
+              .l = list(.data$service_list),
+              .f = function(service_list, selection) {
+                n <- selection %in% service_list
+                return(
+                  sum(n) == length(n)
+                )
+              },
+              selection = input$treatment_providers_service
+            )
+          ) %>%
+          dplyr::filter(.data$service_flag)
+      }
+
+
+      shinyalert::shinyalert(
+        title = "Success",
+        text = "All of your filters have been applied",
+        size = "m",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        html = FALSE,
+        type = "success",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        animation = TRUE
+      )
+
+    })
+
+
+    # ============================== #
+    # ---- Time Series Viz Deck ----
+    # ============================== #
+
+    output$ts_box <- apexcharter::renderApexchart({
+
+      color <- "#2E93fA"
+      background <- "#FFF"
+
+      od_data <- filtered_overdose_data$data %>% dplyr::collect()
+      #drug_crime_data <- filtered_drug_crime_data$data %>% dplyr::collect()
+
+      overdose_daily_data <-
+        filtered_overdose_data$data %>%
+        dplyr::mutate(
+          date = lubridate::as_date(lubridate::ymd_hms(.data$date))
+        ) %>%
+        dplyr::group_by(.data$date) %>%
+        dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+        dplyr::arrange(.data$date) %>%
+        dplyr::mutate(
+          type = "Opioid Overdose Daily Cases"
+        )
+
+      overdose_monthly_data <-
+        filtered_overdose_data$data %>%
+        dplyr::mutate(
+          yearmonth = paste0(lubridate::year(.data$date), "/", lubridate::month(.data$date))
+        ) %>%
+        dplyr::group_by(.data$yearmonth) %>%
+        dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+        dplyr::transmute(
+          date = lubridate::ym(.data$yearmonth),
+          n = .data$n
+          #n = .data$n/30
+        ) %>%
+        dplyr::arrange(.data$date) %>%
+        dplyr::mutate(
+          type = "Opioid Overdose Monthly Cases"
+        )
+
+      # drug_crime_monthly_data <-
+      #   drug_crime_data %>%
+      #   dplyr::mutate(
+      #     yearmonth = paste0(lubridate::year(.data$date), "/", lubridate::month(.data$date))
+      #   ) %>%
+      #   dplyr::group_by(.data$yearmonth) %>%
+      #   dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+      #   dplyr::transmute(
+      #     date = lubridate::ym(.data$yearmonth),
+      #     n = .data$n/30
+      #   ) %>%
+      #   dplyr::arrange(.data$date) %>%
+      #   dplyr::mutate(
+      #     type = "Drug Crime Monthly Average Cases"
+      #   )
+
+      plot_data <-
+        overdose_daily_data %>%
+        dplyr::bind_rows(
+          overdose_monthly_data
+          #drug_crime_monthly_data
+        ) %>%
+        purrr::set_names(
+          c("date", "Case count", "type")
+        )
+
+
+
+      spark <-
+        plot_data %>%
+        apexcharter::apex(type = "area-spline",
+                          apexcharter::aes(x = .data$date,
+                                           y = .data[["Case count"]],
+                                           group = .data$type),
+                          auto_update = FALSE) %>%
+        apexcharter::ax_colors(c("#fee0d2", "#de2d26", "#756bb1")) %>%
+        apexcharter::ax_title(
+          text = "Opioid Overdose Case Time Series",
+          align = "left",
+          style = list(fontSize = "22px", fontWeight = 700)
+        ) %>%
+        apexcharter::ax_subtitle(
+          text = "",
+          align = "left"
+        ) %>%
+        apexcharter::ax_xaxis(
+          show = TRUE,
+          tooltip = list(
+            enabled = TRUE
+          )
+        ) %>%
+        apexcharter::ax_yaxis(
+          decimalsInFloat = 0,
+          show = TRUE,
+          title = list(text = "Daily Cases"),
+          axisBorder = list(
+            show = TRUE,
+            color = "#feb24c"
+          ),
+          labels = list(
+            formatter = apexcharter::format_num(".0f"),
+            style = list(
+              colors = "#feb24c"
+            )
+          ),
+          tooltip = list(
+            enabled = TRUE
+          )
+        ) %>%
+        apexcharter::ax_yaxis2(
+          decimalsInFloat = 0,
+          opposite = TRUE,
+          show = TRUE,
+          title = list(text = "Monthly Cases"),
+          forceNiceScale = TRUE,
+          axisBorder = list(
+            show = TRUE,
+            color = "#de2d26"
+          ),
+          labels = list(
+            formatter = apexcharter::format_num(".0f"),
+            style = list(
+              colors = "#de2d26"
+            )
+          ),
+          tooltip = list(
+            enabled = TRUE
+          )
+        ) %>%
+        apexcharter::ax_grid(yaxis = list(lines = list(show = FALSE))) %>%
+        apexcharter::ax_nodata(
+          text = "No data found for this filter",
+          fontSize = "30px"
+        )
+
+      spark$x$sparkbox <- list(
+        color = color, background = background
+      )
+      spark$sizingPolicy <- htmlwidgets::sizingPolicy(
+        defaultWidth = "100%",
+        defaultHeight = "180px",
+        viewer.defaultHeight = "180px",
+        viewer.defaultWidth = "100%",
+        viewer.fill = FALSE,
+        knitr.figure = FALSE,
+        knitr.defaultWidth = "100%",
+        knitr.defaultHeight = "180px",
+        browser.fill = FALSE,
+        viewer.suppress = FALSE,
+        browser.external = TRUE,
+        padding = 15
+      )
+
+      return(spark)
+    })
+
+    # ====================== #
+    # ---- Overdose Map ----
+    # ====================== #
+    opioidOverdoseMapServer(
+      "od_map",
+      filtered_overdose_data,
+      filtered_drug_crime_data,
+      filtered_treatment_providers_data,
+      filter_selection
+    )
+
+    return(
+      filtered_overdose_data
+    )
+
+  })
+}

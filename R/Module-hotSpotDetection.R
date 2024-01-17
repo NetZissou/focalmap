@@ -178,6 +178,7 @@ hotSpotDetectionServer <- function(id, filtered_overdose_data, od_data_all) {
     # ---- A. Hyperparameters ----
     # ============================ #
 
+    od_data_all <- od_data_all %>% dplyr::collect()
 
     hyper_params <- shiny::reactiveValues(
       data_source = od_data_all,

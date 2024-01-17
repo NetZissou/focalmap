@@ -4,7 +4,10 @@
 \alias{data_opioid_overdose}
 \title{Load opioid overdose primary table}
 \usage{
-data_opioid_overdose()
+data_opioid_overdose(parquet = FALSE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 opioid overdose data in primary table format

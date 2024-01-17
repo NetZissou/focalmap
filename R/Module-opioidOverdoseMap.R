@@ -81,6 +81,7 @@ opioidOverdoseMapServer <- function(
       opioid_overdose_map_init_bounds <- opioidDashboard::opioid_overdose_map_init_bounds
 
       leaflet::leaflet() %>%
+        leaflet.extras2::addSpinner() %>%
         # =================== #
         # ---- Map Tiles ----
       # =================== #
@@ -277,7 +278,8 @@ opioidOverdoseMapServer <- function(
           position = "topleft",
           pseudoFullscreen = FALSE
         ) %>%
-        leaflet.extras::addResetMapButton() # reset
+        leaflet.extras::addResetMapButton() %>% # reset %>%
+      leaflet.extras2::stopSpinner()
 
     })
 
@@ -375,16 +377,18 @@ opioidOverdoseMapServer <- function(
 
     shiny::observe({
       leaflet::leafletProxy("overdose_map") %>%
+        leaflet.extras2::addSpinner() %>%
         leaflet::clearGroup(group = "Opioid Overdose Cases") %>%
         leaflet::addCircleMarkers(
-          data = overdose_data(),
+          data = filtered_overdose_data$data, #overdose_data(),
           lng = ~lng, lat = ~lat,
           stroke = FALSE,
           fillColor = "#de2d26",
           fillOpacity = 0.3,
           clusterOptions = leaflet::markerClusterOptions(removeOutsideVisibleBounds = F),
           group = "Opioid Overdose Cases"
-        )
+        ) %>%
+        leaflet.extras2::stopSpinner()
     })
 
     # ==================================================== #
@@ -393,16 +397,18 @@ opioidOverdoseMapServer <- function(
 
     shiny::observe({
       leaflet::leafletProxy("overdose_map") %>%
+        leaflet.extras2::addSpinner() %>%
         leaflet::clearGroup(group = "Drug Crime Cases") %>%
         leaflet::addCircleMarkers(
-          data = drug_crime_data(),
+          data = filtered_drug_crime_data$data, #drug_crime_data(),
           lng = ~lng, lat = ~lat,
           stroke = FALSE,
           fillColor = "#756bb1",
           fillOpacity = 0.3,
           clusterOptions = leaflet::markerClusterOptions(removeOutsideVisibleBounds = F),
           group = "Drug Crime Cases"
-        )
+        ) %>%
+        leaflet.extras2::stopSpinner()
     })
 
     # ================================================== #
@@ -410,6 +416,7 @@ opioidOverdoseMapServer <- function(
     # ================================================== #
     shiny::observe({
       leaflet::leafletProxy("overdose_map") %>%
+        leaflet.extras2::addSpinner() %>%
         leaflet::clearGroup(group = "Treatment Providers") %>%
         leaflet::addMarkers(
           data = treatment_providers_data(),
@@ -424,7 +431,8 @@ opioidOverdoseMapServer <- function(
               "border-color" = "rgba(0,0,0,0.5)"
             )
           )
-        )
+        ) %>%
+        leaflet.extras2::stopSpinner()
     })
 
 

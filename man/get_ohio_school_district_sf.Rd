@@ -4,7 +4,10 @@
 \alias{get_ohio_school_district_sf}
 \title{Load Ohio school district shapefiles}
 \usage{
-get_ohio_school_district_sf()
+get_ohio_school_district_sf(parquet = TRUE)
+}
+\arguments{
+\item{parquet}{parquet format}
 }
 \value{
 sf object
